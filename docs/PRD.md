@@ -1,9 +1,9 @@
 # Product Requirements Document (PRD)
 
 **Product:** Account Research & Outreach Tool (working title)
-**Version:** V1 draft 0.2
+**Version:** V1 v0.3 (locked V1 scope)
 **Date:** 2026-10-03
-**Status:** Draft for review. No technology or architecture decisions are made in this document.
+**Status:** V1 product scope locked. Changes after this point only for a genuine contradiction or blocker. No technology or architecture decisions are made in this document.
 
 ## Source-of-truth rule
 
@@ -27,6 +27,9 @@ This PRD defines **what product we are building**. It does not restate those rul
   - **Re-engagement / expansion:** a relationship already exists (customer, past conversation, past evaluation, existing Teltonika usage, distributor relationship), so the email builds on it instead of introducing Teltonika from scratch.
 - **Company context:** lightweight private account knowledge the user keeps on a company (section 11).
 - **Angle:** one conversation angle derived from research, e.g. "how is connectivity being handled across the new sites".
+- **Batch:** up to 5 companies, newly added or selected from existing ones, submitted for research together. Each company still receives its own independent research run; companies are never combined into one result.
+- **Research status:** the state of a company's latest research run: Not researched, Queued, Researching, Done, Partial or Failed.
+- **Accounts view:** the home screen, a compact table of all saved companies.
 
 ---
 
@@ -62,6 +65,7 @@ A broader commercial audience is explicitly not a V1 target (see Principles).
 ## 4. Value Proposition
 
 - **Time:** compress 20–60 minutes of manual research into a reviewable research output.
+- **Throughput:** submit up to 5 companies at once and start working on finished ones while the others are still being researched.
 - **Depth:** multiple findings, people, technologies and angles, not one generic hook.
 - **Trust:** every finding carries a source and date, and is labelled as fact or inference.
 - **Honesty:** if there is no strong trigger, the tool says so rather than inventing one.
@@ -83,13 +87,14 @@ A broader commercial audience is explicitly not a V1 target (see Principles).
 
 ## 6. V1 Goals
 
-1. Let the user add a company and run deep research on it with minimal input.
+1. Let the user add or select one company, or a batch of up to 5, and run deep research on each with minimal input.
 2. Produce structured account intelligence that follows the required output in `01_RESEARCH_RULES.md` (section 12).
 3. Let the user keep lightweight company context that is reviewed before each research run and reused across runs.
 4. Present several triggers and conversation angles and let the user choose one.
 5. Generate an editable outreach email in the user's voice from the chosen angle, adapted to whether a relationship already exists.
 6. Keep companies, context, research and emails saved so nothing is lost on refresh.
-7. Be useful enough on real companies that the user prefers it to manual research.
+7. Give a compact, scannable view of all accounts and their research status, and research results that are quick to scan with full evidence available on demand.
+8. Be useful enough on real companies that the user prefers it to manual research.
 
 ## 7. V1 Non-Goals
 
@@ -111,6 +116,10 @@ Not in V1:
 - Generalising the intelligence for other vendors or sales teams
 - Any CRM-like feature (pipelines, stages, tasks, activity logs, a notes system)
 - A research-history UI (previous runs are stored, not browsable)
+- Combining several companies into one research result (a batch means independent runs only)
+- Batches larger than 5 companies, or bulk import from a file
+- Complex bulk actions (the only bulk action is: select companies, then research the selected ones)
+- A home screen built from large cards or a dashboard
 - Combining multiple angles in one email
 - Email tuning controls (make shorter, change tone, friendlier, more direct)
 - An in-product learning or feedback system
@@ -118,20 +127,21 @@ Not in V1:
 
 ## 8. Core User Journey
 
-1. **Add a company.** The user enters a company name (and optionally a website).
-2. **Review company context.** When starting research, the company's saved context is shown. The user reviews it, edits it if needed, and can add an optional topic to focus on. Any edits are saved to the company.
-3. **Run research.** The system runs deep external research, combining it with the company context.
-4. **Review results.** The user reads structured account intelligence: overview, people, developments, triggers, angles, gaps and sources.
-5. **Choose one angle and a contact.** The user selects one primary conversation angle, and a contact: either a person found in research, or one they add manually (name and role).
-6. **Generate the outreach email.** The system writes a first-contact or re-engagement/expansion email, depending on the relationship in the company context.
-7. **Edit, regenerate and copy.** The user edits the draft, regenerates it if needed, and copies it out.
-8. **Return later.** Companies, context, research and emails are still there after a refresh. The latest research is shown by default.
+1. **Start from the accounts view.** The home screen is a compact table of all saved companies with their research status.
+2. **Add or select companies.** The user adds one company, or up to 5 new ones at once, or selects up to 5 existing companies in the accounts view and chooses "Research selected". A company name is enough to add a new row; website, company context and a research topic are optional per company.
+3. **Review company context.** Before research starts, the company's saved context is shown. The user reviews it, edits it if needed, and can add an optional topic to focus on. Any edits are saved to the company. In a batch, this happens per company.
+4. **Run research.** The system runs deep external research for each company, combining it with that company's context. In a batch, every company gets its own independent run and its own status.
+5. **Review results.** The user opens a company, even while others from the batch are still researching, and reads structured account intelligence: overview, people, developments, triggers, angles, gaps and sources. Findings are shown compactly, with supporting evidence available on demand.
+6. **Choose one angle and a contact.** The user selects one primary conversation angle, and a contact: either a person found in research, or one they add manually (name and role).
+7. **Generate the outreach email.** The system writes a first-contact or re-engagement/expansion email, depending on the relationship in the company context.
+8. **Edit, regenerate and copy.** The user edits the draft, regenerates it if needed, and copies it out.
+9. **Return later.** Companies, context, research and emails are still there after a refresh. The latest research is shown by default.
 
 ## 9. Functional Requirements
 
 ### 9.1 Company management
-- **FR-1** Add a company by name; optional website.
-- **FR-2** View a list of saved companies, with research status.
+- **FR-1** Add a company by name; website and company context are optional.
+- **FR-2** View all saved companies in the accounts view (FR-30 to FR-36).
 - **FR-3** Open a company to see its context, latest research and emails.
 - **FR-4** Delete a company and its related data (including stored previous runs).
 
@@ -141,10 +151,10 @@ Not in V1:
 
 ### 9.3 Research
 - **FR-7** Starting research shows the current company context, pre-filled and editable, plus an optional per-run topic field. Edits are saved to the company before research begins.
-- **FR-8** Show research progress, since research may take several minutes. The user can leave and return.
+- **FR-8** Show research progress, since research may take several minutes. The user can leave and return. Status is shown per company (FR-24).
 - **FR-9** Produce structured results as described in section 10.
 - **FR-10** Show sources for every finding, with dates.
-- **FR-11** Re-running research creates a new run. Previous runs are kept and never overwritten or deleted. The latest run is shown by default.
+- **FR-11** Re-running research creates a new run. Previous runs are kept and never overwritten or deleted. While the new run is Queued or Researching, the previous research stays available and a notice shows that newer research is in progress. When the new run finishes Done it becomes the default research. The default is the most recent Done run, or the most recent Partial run if there is no Done run. A Failed run never replaces the research being shown.
 
 ### 9.4 Review and selection
 - **FR-12** Show all credible triggers, ranked and labelled by type (sales trigger vs conversation hook) per `03_SALES_TRIGGERS.md`.
@@ -161,6 +171,34 @@ Not in V1:
 
 ### 9.6 Persistence
 - **FR-21** Companies, company context, research runs, sources, selections and emails survive page refresh and return visits.
+
+### 9.7 Batch research
+- **FR-22** The user can add up to 5 new companies at once. Each is a row with a company name (required) and optional website, company context and research topic. Adding a single company is simply a batch of one.
+- **FR-23** Submitting starts one independent research run per company. Companies are never combined into one result; each stays its own account with its own context, runs, people, triggers and emails.
+- **FR-24** Each company has a research status describing its latest run: **Not researched** (no run yet), **Queued**, **Researching**, **Done**, **Partial** (some results returned but the run did not complete) or **Failed** (no usable results). Partial and Failed companies can be retried.
+- **FR-25** Companies in a batch are independent. One failing or running slowly does not affect the others, and the user can open a Done (or Partial) company while others are still Queued or Researching.
+- **FR-26** The limit is 5 companies per submission, whether new rows or selected existing companies. A sixth cannot be added or selected, and a clear message explains why.
+- **FR-27** Likely duplicates (same name or website as an existing company) are flagged before submission so the user can decide.
+- **FR-28** The user may submit another batch while earlier runs are still running. **Queued** represents research waiting to start. Actual concurrency limits are decided during architecture.
+- **FR-29** For each company in a batch, website, company context and research topic are all optional. Context entered is saved to the company and used by the research (satisfying FR-7 and UC-2). Whether these fields are initially visible or progressively revealed per company is decided in USER_FLOW and DESIGN. The default batch-entry interface must not be dense; a name alone is enough.
+- **FR-42** The user can select up to 5 eligible existing companies in the accounts table and start research for them together with one "Research selected" action. This uses the same independent-run model as adding new companies (FR-23). A company is eligible unless it is currently Queued or Researching, so Not researched, Done, Partial and Failed companies can be selected (the last three being re-research). There are no other bulk actions in V1.
+- **FR-43** Before research starts for selected companies, each company's saved context is shown and editable, with an optional per-company research topic (satisfying FR-7). How much is visible at once is decided in USER_FLOW and DESIGN.
+
+### 9.8 Accounts view (home)
+- **FR-30** The home screen is a compact table/list of all companies, not a dashboard of large cards.
+- **FR-31** Candidate columns: Company, Industry, Client type, Research status, Last researched, and the strength of the strongest current trigger/signal. Final columns are decided in USER_FLOW and DESIGN.
+- **FR-32** Research status must be easy to scan. It is shown as a text label and may later also use colour or an indicator; it must not rely on colour alone. Final visual styling is not defined here.
+- **FR-33** Statuses update in the accounts view while it is open, so the user does not have to resubmit or reload to see progress. The mechanism is decided in architecture.
+- **FR-34** Industry, Client type, Last researched and trigger strength come from the company's latest Done or Partial run and are blank until one exists. Trigger strength shows the rank only (Strong / Medium / Weak, or "None found") per `03_SALES_TRIGGERS.md`; it is a scanning aid and does not replace reviewing the findings.
+- **FR-35** Opening a row opens that company.
+- **FR-36** Adding a company or a batch, and selecting existing companies for "Research selected" (FR-42), are reachable from the accounts view.
+
+### 9.9 Results presentation
+- **FR-37** Research results are compact and scannable by default. Developments, triggers, people and other intelligence may initially appear as concise rows, bullets or summary items. Large cards are not assumed for every finding.
+- **FR-38** Each item can be opened on demand to show supporting evidence, source(s), date, confidence and deeper explanation.
+- **FR-39** The compact form shows enough to judge relevance at a glance: a short summary and the FACT / INFERENCE / POSSIBLE OPPORTUNITY label, plus the date for developments and the rank for triggers.
+- **FR-40** Compactness is presentation only. It must not reduce research depth, the number of findings, or the evidence kept for each.
+- **FR-41** The source for a finding is reachable in one interaction from the finding, and the full list of sources remains available.
 
 ## 10. Research / Intelligence Requirements
 
@@ -192,6 +230,7 @@ Product-level requirements that apply across all of them:
 - **RR-6 No product selection.** Research does not recommend specific Teltonika products (`01` §11).
 - **RR-7 People.** Only publicly discoverable people connected to the project, technology or application, not a list of senior executives (`01` §7). No responsibilities are inferred from a title alone.
 - **RR-8 Judgement stays with the user.** The recommended angle is one option among several (`01` §12).
+- **RR-9 Quick scanning, deep evidence on demand.** Results are compact by default; depth is never reduced to achieve that (FR-37 to FR-41).
 
 ## 11. User Context Requirements
 
@@ -200,7 +239,7 @@ Company context is lightweight private account knowledge that public research ca
 Typical content: existing relationship, products already used, distributor relationship, competitors, previous conversations, previous evaluations, known projects, relevant internal notes.
 
 - **UC-1** Context is a single free-text field per company. It is not a structured notes system, a log or a timeline.
-- **UC-2** When research starts, the current company context is shown, pre-filled and editable, so the user can review or update it first (FR-7). No extra confirmation step is required beyond starting the run.
+- **UC-2** When research starts, the current company context is shown, pre-filled and editable, so the user can review or update it first (FR-7; in a batch, through each company's row, FR-29). No extra confirmation step is required beyond starting the run.
 - **UC-3** Research combines the context with external findings, so what is surfaced reflects both. Example: if the company already buys through a distributor and a new remote-monitoring project is found, the angle is *expanding into that project*, not *introducing Teltonika as a new vendor*.
 - **UC-4** Context is shown to the user as **user-supplied**. It is never presented as externally verified fact or given a public source.
 - **UC-5** If context contradicts public findings, show both and flag the conflict. Do not silently pick one.
@@ -242,9 +281,9 @@ Conceptual only. No schema or storage technology is chosen here.
 
 | Data | Contents |
 |---|---|
-| **Company** | Name, optional website, trading name (if found), created/updated dates |
+| **Company** | Name, optional website, trading name (if found), created/updated dates. Research status and last-researched date are derived from the latest run ("Not researched" when no run exists) |
 | **Company context** | Free-text context, last updated |
-| **Research run** | Company link, snapshot of company context at run start, optional per-run topic, status, start/finish time, which version of `docs/intelligence/` was used. Runs are never overwritten or deleted (except when the company is deleted) |
+| **Research run** | Company link, snapshot of company context at run start, optional per-run topic, status (Queued / Researching / Done / Partial / Failed), start/finish time, which version of `docs/intelligence/` was used. Runs are never overwritten or deleted (except when the company is deleted) |
 | **Research result** | Overview, trading-name evidence and confidence, classification (including "Other"), people, developments, other account intelligence, triggers, conversation angles, recommended angle, research gaps |
 | **Finding** | Text, label (FACT / INFERENCE / POSSIBLE OPPORTUNITY), date, confidence, trigger rank, link to sources |
 | **Source** | URL, title, publisher/type, publication date, aggregator flag |
@@ -273,6 +312,16 @@ Conceptual only. No schema or storage technology is chosen here.
 | Email requested from a weak/hook-only angle | Generate it, with a visible notice that no strong Teltonika-relevant sales trigger was found. No confirmation step |
 | Page refresh mid-research | The run continues or is recoverable; nothing is lost |
 | Company industry outside listed categories | Classified as **Other** |
+| User tries to add more than 5 companies in a batch | A sixth row cannot be added; a clear message explains the limit |
+| Batch row has no company name | The row is flagged and not submitted; name is the only required field |
+| Company looks like a duplicate of an existing one | Flag before submission; the user decides |
+| One company in a batch fails or is slow | Only that company shows Failed/Partial or stays Researching; the others continue; retry is per company |
+| Company opened while Queued or Researching | Show its current status and that research is in progress; no results until available |
+| Company re-researched while earlier results exist | Previous research stays available with a notice that newer research is in progress; when the new run finishes Done it becomes the default (FR-11) |
+| Re-research ends Failed or Partial | Previous Done research stays the default; the status shows the newer run's outcome and it can be retried |
+| Company is Queued or Researching | It cannot be selected for another run until that run ends |
+| Industry, client type or trigger strength not yet known | Shown blank in the accounts view; never guessed |
+| Findings are collapsed | Label, summary and date/rank stay visible; evidence is one interaction away |
 
 ## 15. V1 Acceptance Criteria
 
@@ -284,7 +333,7 @@ V1 is acceptable when all of the following are true:
 4. Every finding has at least one source and a date, or is explicitly marked as lacking one.
 5. Findings are visibly labelled FACT, INFERENCE or POSSIBLE OPPORTUNITY.
 6. Company context is visibly distinguished from externally sourced findings.
-7. Re-running research creates a new run; previous runs remain stored and the latest is shown by default.
+7. Re-running research creates a new run; previous runs remain stored. While the new run is in progress the previous research stays available with a notice, and when the new run finishes Done it becomes the default.
 8. Several triggers/angles are shown, with one marked as recommended, and the user can choose a different one. Exactly one angle is selected per email.
 9. The user can choose a contact found in research, or add one manually with a name and role. This works even when research finds nobody.
 10. For a company with no strong trigger, the tool says so rather than inventing one.
@@ -293,8 +342,13 @@ V1 is acceptable when all of the following are true:
 13. When company context indicates an existing relationship, the email is written in re-engagement/expansion mode, does not use first-contact language, and shows which mode was used.
 14. Generated emails follow `04_OUTREACH_RULES.md` (reviewed by the user) and contain no unsupported claims.
 15. Companies, context, research, selections and emails persist after page refresh.
-16. None of the V1 non-goals (section 7) are implemented.
-17. **Real-world check (proposed):** run on at least five companies the user has already researched manually. The user judges the output at least as useful as the manual research for most of them, and the emails need only light editing.
+16. Up to 5 new companies can be added, or up to 5 eligible existing companies selected in the accounts table, and researched together. New rows need only a name; website, context and a research topic are optional per company. A sixth is not accepted. A single company works the same way.
+17. Each submitted company gets its own independent run and status (Not researched, Queued, Researching, Done, Partial, Failed). Results are never combined, and one company's failure does not affect the others. Another batch can be submitted while earlier runs are still going.
+18. A completed company can be opened while other companies from the batch are still being researched.
+19. The home screen is a compact accounts table showing at least company and research status, and, once researched, industry, client type, last researched and strongest trigger strength. Status is easy to scan and not conveyed by colour alone.
+20. Research results show findings, triggers and people as compact items with their label and date or rank. Evidence, sources, date, confidence and explanation are available on demand, and no finding or evidence is removed to make results compact.
+21. None of the V1 non-goals (section 7) are implemented.
+22. **Real-world check (proposed):** run on at least five companies the user has already researched manually, ideally as one batch. The user judges the output at least as useful as the manual research for most of them, and the emails need only light editing.
 
 ## 16. Future / V2 Direction
 
@@ -308,6 +362,8 @@ Possibilities only. None are V1 requirements, and none should shape V1 scope bey
 6. **Email tuning controls.** Shorter, friendlier, more direct, etc., if hand-editing and regeneration prove insufficient.
 7. **Combining angles** in one email, if real use shows a need.
 8. **In-product learning loop.** A way to capture feedback and propose updates to the intelligence rules, per `06_LEARNING_RULES.md`.
+9. **Larger batches and bulk import** (e.g. from a spreadsheet), once cost and load are understood.
+10. **Accounts view refinements** such as advanced sorting, filtering, grouping and status indicators beyond the V1 table.
 
 ## 17. Decisions and Open Questions
 
@@ -323,13 +379,21 @@ Possibilities only. None are V1 requirements, and none should shape V1 scope bey
 | Angle selection | Exactly one primary angle per email |
 | Email iteration | Edit, regenerate, copy only |
 | Access | Single user; no complex authentication |
+| Batch research | Up to 5 companies per submission, each an independent run and account; one company must still work on its own; name alone is enough to add a row; website, context and topic optional per company, with visibility decided in USER_FLOW and DESIGN |
+| Existing companies in a batch | Select up to 5 eligible existing companies in the accounts table and use "Research selected"; same independent-run model; no other bulk actions |
+| Back-to-back batches | Another batch can be submitted while earlier runs are running; Queued means waiting to start; concurrency limits decided in architecture |
+| Re-research | Previous research stays available with an "in progress" notice; a run that finishes Done becomes the default |
+| Home screen | Compact accounts table/list, not large cards; columns refined in USER_FLOW and DESIGN |
+| Results density | Compact, scannable items by default; evidence, source, date, confidence and explanation on demand; depth never reduced |
 | Learning / feedback | Manual; no in-product learning system |
 | Research time / cost limits | Not defined now; evaluated during architecture and API decisions |
 | Unlisted industries | Classified as "Other" |
 
-### Remaining open questions (none blocks USER_FLOW.md)
+### Open questions
 
-1. **Access protection.** No complex authentication is assumed. Whether any minimal protection is needed once hosted is an architecture-stage question.
-2. **Intelligence gap: mixed relationships.** `04` §5 only distinguishes cold first contact from an existing contact. It does not define how to write to a new person at an existing customer, or an expansion email about a newly found project. OR-10 sets a safe product rule, but the wording guidance may later need an update to `04_OUTREACH_RULES.md`, to be proposed and approved separately, not edited here.
-3. **Previous runs.** They are stored but not viewable in V1. Whether a minimal way to open an older run is needed will be revisited if it proves necessary in use.
-4. **Research time and cost.** To be set once architecture and APIs are chosen.
+V1 scope is locked. The items below do not change scope and are revisited at the stage noted.
+
+1. **Cost and load (architecture).** A batch of 5 deep research runs multiplies cost and load, while research time and cost limits are still undefined. This should be evaluated when architecture and APIs are chosen.
+2. **Access protection (architecture).** No complex authentication is assumed. Whether any minimal protection is needed once hosted is an architecture question.
+3. **Intelligence gap: mixed relationships.** `04` §5 only distinguishes cold first contact from an existing contact. It does not define how to write to a new person at an existing customer, or an expansion email about a newly found project. OR-10 sets a safe product rule, but the wording guidance may later need an update to `04_OUTREACH_RULES.md`, to be proposed and approved separately, not edited here.
+4. **Previous runs.** They are stored but not viewable in V1. Whether a minimal way to open an older run is needed will be revisited if it proves necessary in use.

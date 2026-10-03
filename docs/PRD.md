@@ -189,7 +189,7 @@ Not in V1:
 - **FR-31** Candidate columns: Company, Industry, Client type, Research status, Last researched, and the strength of the strongest current trigger/signal. Final columns are decided in USER_FLOW and DESIGN.
 - **FR-32** Research status must be easy to scan. It is shown as a text label and may later also use colour or an indicator; it must not rely on colour alone. Final visual styling is not defined here.
 - **FR-33** Statuses update in the accounts view while it is open, so the user does not have to resubmit or reload to see progress. The mechanism is decided in architecture.
-- **FR-34** Industry, Client type, Last researched and trigger strength come from the company's latest Done or Partial run and are blank until one exists. Trigger strength shows the rank only (Strong / Medium / Weak, or "None found") per `03_SALES_TRIGGERS.md`; it is a scanning aid and does not replace reviewing the findings.
+- **FR-34** Industry, Client type, Last researched and trigger strength come from the company's default research (FR-11) and are blank until one exists. Trigger strength shows the rank only (Strong / Medium / Weak, or "None found") per `03_SALES_TRIGGERS.md`; it is a scanning aid and does not replace reviewing the findings.
 - **FR-35** Opening a row opens that company.
 - **FR-36** Adding a company or a batch, and selecting existing companies for "Research selected" (FR-42), are reachable from the accounts view.
 

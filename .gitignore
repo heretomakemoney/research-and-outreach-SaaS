@@ -1,0 +1,21 @@
+# dependencies
+node_modules
+
+# Next.js build output
+.next
+out
+
+# secrets - NEVER commit these
+.env
+.env.local
+.env.*.local
+
+# development debug output (raw API responses) - may be large, never needed by the product
+debug
+runs
+
+# misc
+*.tsbuildinfo
+next-env.d.ts
+npm-debug.log*
+.DS_Store

@@ -1,0 +1,39 @@
+/* Deliberately minimal. Function first, design later. */
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.45;
+  color: #1a1a1a;
+  background: #fafafa;
+}
+main { max-width: 960px; margin: 0 auto; padding: 24px 16px 80px; }
+h1 { font-size: 1.5rem; margin: 0 0 4px; }
+h2 { font-size: 1.15rem; margin: 28px 0 8px; }
+.muted { color: #666; font-size: 0.9rem; }
+form { display: grid; gap: 12px; margin: 16px 0; }
+label { display: grid; gap: 4px; font-weight: 600; font-size: 0.9rem; }
+label .hint { font-weight: 400; color: #666; }
+input, textarea, select, button { font: inherit; }
+input, textarea, select { padding: 8px; border: 1px solid #bbb; border-radius: 6px; background: #fff; }
+textarea { min-height: 70px; resize: vertical; }
+button { padding: 9px 16px; border-radius: 6px; border: 1px solid #333; background: #222; color: #fff; cursor: pointer; }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+button.secondary { background: #fff; color: #222; }
+.row { display: flex; gap: 12px; flex-wrap: wrap; align-items: end; }
+.error { border: 1px solid #c0392b; background: #fdecea; color: #7b241c; padding: 10px 12px; border-radius: 6px; margin: 12px 0; }
+.warning { border: 1px solid #b9770e; background: #fef5e7; color: #7e5109; padding: 8px 12px; border-radius: 6px; margin: 8px 0; }
+.answer { white-space: pre-wrap; background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 14px; }
+.marker { font-size: 0.8em; vertical-align: super; }
+table { width: 100%; border-collapse: collapse; background: #fff; font-size: 0.9rem; }
+th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: left; vertical-align: top; }
+th { background: #f0f0f0; }
+td.url { word-break: break-all; }
+details { background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 8px 12px; margin: 8px 0; }
+summary { cursor: pointer; font-weight: 600; }
+.kv { display: grid; grid-template-columns: 220px 1fr; gap: 2px 12px; font-size: 0.9rem; margin: 8px 0; }
+.kv dt { color: #555; }
+.kv dd { margin: 0; }
+ul.plain { margin: 4px 0; padding-left: 18px; }
+.saved { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+.saved button { background: #fff; color: #222; border-color: #bbb; font-size: 0.85rem; padding: 5px 10px; }

@@ -1,16 +1,20 @@
-// The ONLY file that talks to the Anthropic API.
+// The Anthropic API client, and the one function for plain (no web tools) calls.
 //
-// It runs on the server only. The API key is read from the environment
-// (.env.local) here and nowhere else, and is never sent to the browser.
+// Server only. The API key is read from the environment (.env.local or the
+// hosting platform's environment variables) here and nowhere else, and is
+// never sent to the browser.
+//
+// The web-tool loop used by the research stages lives in
+// retrieval/anthropicWebTools.ts, because that is the part we may replace
+// with a different search provider later.
 
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
-import { TOOL_VERSIONS } from "./config";
 
 export class MissingApiKeyError extends Error {
   constructor() {
     super(
-      "ANTHROPIC_API_KEY is not set. Copy .env.example to .env.local, add your key, and restart `npm run dev`.",
+      "ANTHROPIC_API_KEY is not set. Add it to .env.local (local) or to the Vercel project's environment variables, then restart / redeploy.",
     );
   }
 }
@@ -20,84 +24,47 @@ export function getClient(): Anthropic {
   return new Anthropic(); // reads ANTHROPIC_API_KEY from the environment
 }
 
-export interface WebToolCall {
+export interface StructuredCall {
   model: string;
   system: Anthropic.TextBlockParam[];
   userText: string;
-  maxSearches: number;
-  maxFetches: number;
-  maxContinuations: number;
   maxTokens: number;
   effort: "low" | "medium" | "high";
-  searchCountry: string;
+  /** JSON schema the answer must follow (structured outputs). Every object needs additionalProperties:false. */
+  schema: Record<string, unknown>;
 }
 
-export interface WebToolCallResult {
-  /** Every content block from every request, in order. */
-  blocks: Anthropic.ContentBlock[];
-  /** The `usage` object of every request (a long answer can take several). */
-  usages: Anthropic.Usage[];
-  stopReasons: (string | null)[];
-  continuations: number;
+export interface StructuredResult {
+  text: string; // the JSON text of the answer
+  usage: Anthropic.Usage;
+  stopReason: string | null;
   durationMs: number;
 }
 
 /**
- * Ask Claude something with web search + web fetch switched on.
- *
- * Anthropic runs the searches and page reads on ITS servers, inside our one
- * request. If the turn gets long, Anthropic pauses it (stop_reason "pause_turn")
- * and we simply send the paused answer back to let it carry on.
+ * One request, no tools, answer constrained to a JSON schema.
+ * Used by the synthesis and email stages, which only reason over the compact
+ * research state and never touch the web.
  */
-export async function runWithWebTools(call: WebToolCall): Promise<WebToolCallResult> {
+export async function runStructured(call: StructuredCall): Promise<StructuredResult> {
   const client = getClient();
   const started = Date.now();
-
-  const messages: Anthropic.MessageParam[] = [{ role: "user", content: call.userText }];
-  const blocks: Anthropic.ContentBlock[] = [];
-  const usages: Anthropic.Usage[] = [];
-  const stopReasons: (string | null)[] = [];
-  let continuations = 0;
-
-  for (;;) {
-    // We stream so that a long request is not cut off by a timeout,
-    // then wait for the complete message with finalMessage().
-    const stream = client.messages.stream({
-      model: call.model,
-      max_tokens: call.maxTokens,
-      thinking: { type: "adaptive" },
-      output_config: { effort: call.effort },
-      system: call.system,
-      tools: [
-        {
-          type: TOOL_VERSIONS.search,
-          name: "web_search",
-          max_uses: call.maxSearches,
-          user_location: { type: "approximate", country: call.searchCountry },
-        },
-        {
-          type: TOOL_VERSIONS.fetch,
-          name: "web_fetch",
-          max_uses: call.maxFetches,
-          citations: { enabled: true },
-        },
-      ],
-      messages,
-    });
-    const message = await stream.finalMessage();
-
-    blocks.push(...message.content);
-    usages.push(message.usage);
-    stopReasons.push(message.stop_reason);
-
-    if (message.stop_reason === "pause_turn" && continuations < call.maxContinuations) {
-      continuations++;
-      // Send the paused answer back unchanged. Do NOT add a "continue" message.
-      messages.push({ role: "assistant", content: message.content });
-      continue;
-    }
-    break;
-  }
-
-  return { blocks, usages, stopReasons, continuations, durationMs: Date.now() - started };
+  // Stream, then wait for the whole message: avoids request timeouts on long answers.
+  const stream = client.messages.stream({
+    model: call.model,
+    max_tokens: call.maxTokens,
+    thinking: { type: "adaptive" },
+    output_config: {
+      effort: call.effort,
+      format: { type: "json_schema", schema: call.schema },
+    },
+    system: call.system,
+    messages: [{ role: "user", content: call.userText }],
+  });
+  const message = await stream.finalMessage();
+  const text = message.content
+    .filter((b): b is Anthropic.TextBlock => b.type === "text")
+    .map((b) => b.text)
+    .join("");
+  return { text, usage: message.usage, stopReason: message.stop_reason, durationMs: Date.now() - started };
 }

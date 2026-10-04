@@ -2,7 +2,7 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { estimateCost, sumUsage } from "./pricing.ts";
+import { estimateCost, sumUsage, totalCost } from "./pricing.ts";
 
 test("usage is summed across every request of a stage", () => {
   const usage = sumUsage("claude-opus-5-5", [
@@ -34,4 +34,43 @@ test("cost estimate follows the published price table (Opus 5.5)", () => {
 
 test("an unknown model gets no invented price", () => {
   assert.equal(estimateCost(sumUsage("some-other-model", [])), null);
+});
+
+// Calibration against the first real run (NTT Australia, Opus 5.5, one API request).
+// The numbers are the ones Anthropic's usage object reported; the dollar figures are the
+// estimate the app showed for that run.
+test("the real NTT run is priced exactly as it was shown ($0.4144)", () => {
+  const usage = sumUsage("claude-opus-5-5", [
+    {
+      input_tokens: 183,
+      output_tokens: 5158,
+      cache_creation_input_tokens: 38012,
+      cache_read_input_tokens: 352049,
+      server_tool_use: { web_search_requests: 5, web_fetch_requests: 4 },
+    },
+  ]);
+  const cost = estimateCost(usage)!;
+  assert.equal(cost.inputUsd.toFixed(4), "0.0007");
+  assert.equal(cost.outputUsd.toFixed(4), "0.1032");
+  assert.equal(cost.cacheWriteUsd.toFixed(4), "0.1901");
+  assert.equal(cost.cacheReadUsd.toFixed(4), "0.0704");
+  assert.equal(cost.searchUsd.toFixed(2), "0.05");
+  assert.equal(cost.totalUsd.toFixed(4), "0.4144");
+});
+
+test("the same tokens on Sonnet 5.5 (what the Q1 discover stage would cost if usage were identical)", () => {
+  const usage = sumUsage("claude-sonnet-5-5", [
+    { input_tokens: 183, output_tokens: 5158, cache_creation_input_tokens: 38012, cache_read_input_tokens: 352049, server_tool_use: { web_search_requests: 5 } },
+  ]);
+  assert.equal(estimateCost(usage)!.totalUsd.toFixed(4), "0.2674");
+});
+
+test("totals add up across stage logs", () => {
+  const log = (usd: number, searches: number) =>
+    ({ cost: { totalUsd: usd }, usage: { searchRequests: searches, fetchRequests: 1 }, durationMs: 1000 }) as never;
+  const t = totalCost([log(0.27, 5), log(0.17, 0), log(0.02, 0)]);
+  assert.equal(t.totalUsd.toFixed(2), "0.46");
+  assert.equal(t.searches, 5);
+  assert.equal(t.fetches, 3);
+  assert.equal(t.durationMs, 3000);
 });

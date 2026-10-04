@@ -9,7 +9,8 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import type Anthropic from "@anthropic-ai/sdk";
 
-const RULES_DIR = path.join(process.cwd(), "docs", "intelligence");
+// Worked out on every call (not once at start-up), so the files are really read at run time.
+const rulesDir = () => path.join(process.cwd(), "docs", "intelligence");
 
 export interface RuleFile {
   name: string;
@@ -20,7 +21,7 @@ export async function loadRules(fileNames: readonly string[]): Promise<RuleFile[
   return Promise.all(
     fileNames.map(async (name) => ({
       name,
-      text: await fs.readFile(path.join(RULES_DIR, name), "utf-8"),
+      text: await fs.readFile(path.join(rulesDir(), name), "utf-8"),
     })),
   );
 }

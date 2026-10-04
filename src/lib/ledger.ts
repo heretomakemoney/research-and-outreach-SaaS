@@ -11,7 +11,7 @@
 // with plain fake data (see ledger.test.ts).
 
 import type Anthropic from "@anthropic-ai/sdk";
-import type { LedgerSource, LedgerStats } from "./types";
+import type { AnswerSegment, LedgerSource, LedgerStats } from "./types";
 
 const MAX_EXCERPTS_PER_SOURCE = 5;
 const MAX_EXCERPT_CHARS = 300;
@@ -33,15 +33,34 @@ export function canonicalUrl(raw: string): string {
 }
 
 export interface LedgerResult {
+  /** All sources: the ones passed in as `existingSources` first (keys unchanged), then new ones. */
   sources: LedgerSource[];
-  /** Claude's answer text with " [S3][S5]" markers added after each cited passage. */
+  /** Claude's answer text with " [S3][S5]" markers added after each cited passage (trimmed). */
   answerText: string;
+  /** The same text, NOT trimmed. `segments` offsets refer to this string. */
+  rawAnswerText: string;
+  /** For each text block: where it sits in rawAnswerText and which API excerpts back it. */
+  segments: AnswerSegment[];
   stats: LedgerStats;
 }
 
-export function buildLedger(blocks: Anthropic.ContentBlock[]): LedgerResult {
+/**
+ * @param existingSources sources found by EARLIER stages. They keep their keys
+ *   (S1, S2, ...) so that source IDs are stable across the whole workflow, and
+ *   a page found again is not added twice. Fetched-document positions
+ *   (document_index) are per request, so these never take part in that mapping.
+ */
+export function buildLedger(
+  blocks: Anthropic.ContentBlock[],
+  existingSources: readonly LedgerSource[] = [],
+): LedgerResult {
   const sources: LedgerSource[] = [];
   const byUrl = new Map<string, LedgerSource>();
+  for (const prior of existingSources) {
+    const copy: LedgerSource = { ...prior, citedExcerpts: [...prior.citedExcerpts] };
+    sources.push(copy);
+    byUrl.set(canonicalUrl(copy.url), copy);
+  }
   // Fetched documents in the order they were returned. A citation of a fetched
   // page refers to it by position ("document_index"), not by URL.
   const fetchedInOrder: LedgerSource[] = [];
@@ -99,6 +118,8 @@ export function buildLedger(blocks: Anthropic.ContentBlock[]): LedgerResult {
   }
 
   const answerParts: string[] = [];
+  const segments: AnswerSegment[] = [];
+  let rawLength = 0;
 
   for (const block of blocks) {
     switch (block.type) {
@@ -153,6 +174,7 @@ export function buildLedger(blocks: Anthropic.ContentBlock[]): LedgerResult {
       case "text": {
         stats.textBlocks++;
         const keys: string[] = [];
+        const segmentCitations: { sourceKey: string; excerpt: string }[] = [];
         for (const citation of block.citations ?? []) {
           stats.citationsTotal++;
           let source: LedgerSource | undefined;
@@ -177,8 +199,21 @@ export function buildLedger(blocks: Anthropic.ContentBlock[]): LedgerResult {
           source.citedCount++;
           addExcerpt(source, citation.cited_text);
           if (!keys.includes(source.key)) keys.push(source.key);
+          const excerpt = (citation.cited_text ?? "").replace(/\s+/g, " ").trim().slice(0, MAX_EXCERPT_CHARS);
+          if (
+            excerpt &&
+            !segmentCitations.some((c) => c.sourceKey === source.key && c.excerpt === excerpt)
+          ) {
+            segmentCitations.push({ sourceKey: source.key, excerpt });
+          }
         }
-        answerParts.push(block.text + keys.map((k) => ` [${k}]`).join(""));
+        // Only OUR code may write [S#] markers. If Claude typed one itself, neutralise it
+        // so it can never pass for a real citation.
+        const safeText = block.text.replace(/\[(S\d+)\]/g, "($1)");
+        const piece = safeText + keys.map((k) => ` [${k}]`).join("");
+        segments.push({ start: rawLength, end: rawLength + piece.length, citations: segmentCitations });
+        rawLength += piece.length;
+        answerParts.push(piece);
         break;
       }
 
@@ -192,5 +227,6 @@ export function buildLedger(blocks: Anthropic.ContentBlock[]): LedgerResult {
     }
   }
 
-  return { sources, answerText: answerParts.join("").trim(), stats };
+  const rawAnswerText = answerParts.join("");
+  return { sources, answerText: rawAnswerText.trim(), rawAnswerText, segments, stats };
 }

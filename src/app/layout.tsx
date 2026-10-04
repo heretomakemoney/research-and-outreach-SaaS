@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Account Research",
-  description: "Phase 1 research prototype",
+  description: "Phase 1 research and outreach prototype",
   robots: { index: false, follow: false },
 };
 

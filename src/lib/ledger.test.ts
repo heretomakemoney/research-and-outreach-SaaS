@@ -143,3 +143,48 @@ test("tool activity is recorded", () => {
   assert.equal(stats.fetchedOk, 2);
   assert.equal(stats.thinkingBlocks, 1);
 });
+
+// ---- additions for the staged pipeline ----
+
+test("sources found by an earlier stage keep their keys and are not added twice", () => {
+  const first = buildLedger(blocks as never);
+  const second = buildLedger(
+    [
+      {
+        type: "web_search_tool_result",
+        tool_use_id: "srv_9",
+        caller: { type: "direct" },
+        content: [
+          { type: "web_search_result", url: "https://indratel.com.au/", title: "Indratel", page_age: null, encrypted_content: "e" },
+          { type: "web_search_result", url: "https://brand-new.example/", title: "New", page_age: null, encrypted_content: "e" },
+        ],
+      },
+    ] as never,
+    first.sources,
+  );
+  assert.equal(second.sources.length, first.sources.length + 1);
+  assert.equal(second.sources[0].key, "S1");
+  assert.equal(second.sources[second.sources.length - 1].key, `S${first.sources.length + 1}`);
+  assert.equal(second.sources[second.sources.length - 1].url, "https://brand-new.example/");
+  // the earlier object was not mutated
+  assert.equal(first.sources.length, 6);
+});
+
+test("segments record which API excerpts back which part of the answer", () => {
+  const result = buildLedger(
+    [
+      { type: "text", text: "First claim.", citations: [{ type: "web_search_result_location", url: "https://a.example/", title: "A", cited_text: "excerpt A", encrypted_index: "i" }] },
+      { type: "text", text: " Second, uncited.", citations: null },
+    ] as never,
+  );
+  assert.equal(result.segments.length, 2);
+  assert.deepEqual(result.segments[0].citations, [{ sourceKey: "S1", excerpt: "excerpt A" }]);
+  assert.equal(result.rawAnswerText.slice(result.segments[0].start, result.segments[0].end), "First claim. [S1]");
+  assert.deepEqual(result.segments[1].citations, []);
+});
+
+test("a [S#] marker typed by Claude is neutralised so it cannot pass for a real citation", () => {
+  const result = buildLedger([{ type: "text", text: "I claim this [S7] is sourced.", citations: null }] as never);
+  assert.ok(!result.rawAnswerText.includes("[S7]"));
+  assert.ok(result.rawAnswerText.includes("(S7)"));
+});

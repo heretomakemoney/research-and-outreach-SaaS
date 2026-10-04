@@ -37,3 +37,23 @@ summary { cursor: pointer; font-weight: 600; }
 ul.plain { margin: 4px 0; padding-left: 18px; }
 .saved { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
 .saved button { background: #fff; color: #222; border-color: #bbb; font-size: 0.85rem; padding: 5px 10px; }
+
+/* ---- Q1 prototype additions ---- */
+h3 { font-size: 1rem; margin: 8px 0 4px; }
+.panel { background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 12px 14px; margin: 10px 0; display: grid; gap: 6px; }
+.panel p { margin: 2px 0; }
+.progress { border-color: #2c6fbb; background: #eef5fc; }
+.badge { display: inline-block; background: #222; color: #fff; font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 10px; letter-spacing: 0.02em; }
+.badge.light { background: #eee; color: #333; font-weight: 500; }
+.relevance-strong { background: #1e7e34; }
+.relevance-moderate { background: #2c6fbb; }
+.relevance-weak { background: #b9770e; }
+.relevance-none { background: #777; }
+.trigger-primary { border-color: #1e7e34; border-width: 2px; }
+.card { border-left: 3px solid #bbb; padding: 4px 10px; margin: 6px 0; background: #fcfcfc; }
+.card details { border: none; padding: 2px 0; margin: 2px 0; background: transparent; }
+.angle.selected { border-color: #2c6fbb; border-width: 2px; background: #f6faff; }
+.angle-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-weight: 400; cursor: pointer; }
+label.inline { display: flex; gap: 8px; align-items: center; font-weight: 400; }
+.grow { flex: 1 1 260px; }
+.email-body { min-height: 300px; font-family: inherit; line-height: 1.5; }

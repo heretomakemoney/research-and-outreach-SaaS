@@ -6,7 +6,7 @@
 // ESTIMATE: prices can change, and discounts or credits are not visible here.
 // The authoritative number is on the Usage page of the Anthropic Console.
 
-import type { CostEstimate, ModelId, UsageSummary } from "./types";
+import type { CostEstimate, ModelId, StageLog, UsageSummary } from "./types";
 
 export const PRICES_CHECKED_ON = "2026-10-03";
 export const PRICES_SOURCE = "https://platform.claude.com/docs/en/about-claude/pricing";
@@ -21,6 +21,7 @@ interface ModelPrice {
   cacheReadPerMTok: number; // cache hit
 }
 
+// Keep this table in step with KNOWN_MODELS in types.ts and the model per stage in config.ts.
 const MODEL_PRICES: Record<ModelId, ModelPrice> = {
   "claude-opus-5-5": { inputPerMTok: 4, outputPerMTok: 20, cacheWritePerMTok: 5, cacheReadPerMTok: 0.2 },
   "claude-sonnet-5-5": { inputPerMTok: 2, outputPerMTok: 10, cacheWritePerMTok: 2.5, cacheReadPerMTok: 0.2 },
@@ -78,4 +79,19 @@ export function estimateCost(usage: UsageSummary): CostEstimate | null {
     searchUsd,
     totalUsd: inputUsd + outputUsd + cacheWriteUsd + cacheReadUsd + searchUsd,
   };
+}
+
+/** Add up the cost of several stage logs (research stages + synthesis + every email generation). */
+export function totalCost(logs: readonly StageLog[]): { totalUsd: number; searches: number; fetches: number; durationMs: number } {
+  let totalUsd = 0;
+  let searches = 0;
+  let fetches = 0;
+  let durationMs = 0;
+  for (const log of logs) {
+    totalUsd += log.cost.totalUsd;
+    searches += log.usage.searchRequests;
+    fetches += log.usage.fetchRequests;
+    durationMs += log.durationMs;
+  }
+  return { totalUsd, searches, fetches, durationMs };
 }

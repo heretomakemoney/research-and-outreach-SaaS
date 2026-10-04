@@ -1,30 +1,21 @@
 // Shared types. These are used by BOTH browser code and server code,
 // so this file must not import anything server-only.
 
-/** The models you can pick in the page. Add more here when needed. */
-export const MODEL_OPTIONS = [
-  { id: "claude-opus-5-5", label: "Claude Opus 5.5 (default)" },
-  { id: "claude-sonnet-5-5", label: "Claude Sonnet 5.5 (cheaper)" },
-] as const;
+// ---------------------------------------------------------------- models
 
-export type ModelId = (typeof MODEL_OPTIONS)[number]["id"];
+/** Models the pipeline knows a price for. The model per stage is set in config.ts. */
+export const KNOWN_MODELS = ["claude-opus-5-5", "claude-sonnet-5-5"] as const;
+export type ModelId = (typeof KNOWN_MODELS)[number];
 
-export function isModelId(value: unknown): value is ModelId {
-  return MODEL_OPTIONS.some((m) => m.id === value);
-}
+export type Effort = "low" | "medium" | "high";
 
-/** What you type into the form. */
-export interface IdentifyInput {
-  companyName: string;
-  website: string;
-  context: string; // your private knowledge about the company (unverified)
-  topic: string; // optional question for this run only
-  model: ModelId;
-}
+export type StageName = "discover" | "followup" | "synthesize" | "email";
+
+// ---------------------------------------------------------------- ledger (unchanged from Milestone 1)
 
 /** One entry in the source ledger: a web page Claude's tools touched. */
 export interface LedgerSource {
-  key: string; // "S1", "S2", ... numbered by our code, never by Claude
+  key: string; // "S1", "S2", ... numbered by our code, never by Claude. Stable across stages.
   url: string;
   title: string | null;
   pageAge: string | null; // the coarse "page age" from the search result
@@ -33,7 +24,7 @@ export interface LedgerSource {
   fetchKind: "text" | "pdf" | null;
   retrievedAt: string | null;
   fetchError: string | null; // e.g. "url_not_accessible"
-  citedCount: number; // how many times the answer cited this source
+  citedCount: number; // how many times answers cited this source
   citedExcerpts: string[]; // excerpts returned by the API (not written by Claude)
 }
 
@@ -57,7 +48,20 @@ export interface LedgerStats {
   otherBlockTypes: Record<string, number>;
 }
 
-/** Token and tool usage, summed over every API request of the stage. */
+/**
+ * One piece of the answer text and the API-returned citations attached to it.
+ * `start`/`end` are character offsets into the (untrimmed) answer text, so a
+ * line of the answer can be traced back to the exact excerpts that support it.
+ */
+export interface AnswerSegment {
+  start: number;
+  end: number;
+  citations: { sourceKey: string; excerpt: string }[];
+}
+
+// ---------------------------------------------------------------- usage and cost
+
+/** Token and tool usage, summed over every API request of one stage. */
 export interface UsageSummary {
   model: string;
   apiRequests: number; // 1 + number of pause_turn continuations
@@ -80,51 +84,273 @@ export interface CostEstimate {
   totalUsd: number;
 }
 
-export interface IdentifyDebug {
-  stopReasons: (string | null)[];
-  continuations: number;
-  durationMs: number;
-  ledger: LedgerStats;
-  rulesFiles: { name: string; chars: number }[];
-  systemPromptChars: number;
-  toolVersions: { search: string; fetch: string };
-  caps: { maxSearches: number; maxFetches: number; maxContinuations: number; maxTokens: number };
-  effort: string;
-}
-
-export interface IdentifyResult {
-  ok: true;
-  stage: "identify";
-  answerText: string; // Claude's answer, with [S#] markers added by our code
-  sources: LedgerSource[];
+/** Everything we record about one stage run: what was asked, what it cost, how long it took. */
+export interface StageLog {
+  stage: StageName;
+  round: number; // follow-up round number (1, 2, ...) or 1 for other stages
+  model: string;
+  retriever: string | null; // which retrieval layer was used (web-tool stages only)
   usage: UsageSummary;
   cost: CostEstimate;
+  durationMs: number;
+  stopReasons: (string | null)[];
+  continuations: number;
+  rulesFiles: { name: string; chars: number }[];
+  systemPromptChars: number;
+  userMessageChars: number;
+  effort: string;
+  caps: { maxSearches?: number; maxFetches?: number; maxContinuations?: number; maxTokens: number };
+  ledger: LedgerStats | null;
   warnings: string[];
-  debug: IdentifyDebug;
-  createdAt: string;
+  startedAt: string;
 }
+
+// ---------------------------------------------------------------- research state (the compact thing passed between stages)
+
+export interface WorkflowInput {
+  companyName: string;
+  website: string;
+  context: string; // your private knowledge about the company (unverified)
+  topic: string; // optional question for this run only
+}
+
+export type EntityMatch = "Confirmed" | "Probable" | "Ambiguous" | "Not found";
+
+export interface EntityInfo {
+  match: EntityMatch;
+  matchNote: string;
+  name: string;
+  website: string;
+  tradingLegal: string;
+  industry: string;
+  clientType: string;
+  summary: string;
+  contextCheck: string;
+  sourceKeys: string[]; // sources that back the identification lines
+}
+
+export type CardKind =
+  | "company_profile"
+  | "project"
+  | "contract_tender"
+  | "infrastructure"
+  | "technology"
+  | "vendor_partner"
+  | "competitor"
+  | "governance_doc"
+  | "people_post"
+  | "history"
+  | "news"
+  | "other";
+
+export const CARD_KINDS: readonly CardKind[] = [
+  "company_profile",
+  "project",
+  "contract_tender",
+  "infrastructure",
+  "technology",
+  "vendor_partner",
+  "competitor",
+  "governance_doc",
+  "people_post",
+  "history",
+  "news",
+  "other",
+];
+
+/**
+ * One sourced fact. Cards are FACTS only: a claim backed by at least one
+ * source. The id (E1, E2, ...) and the source keys are assigned by our code;
+ * the evidence excerpts are the `cited_text` the API returned.
+ */
+export interface EvidenceCard {
+  id: string; // "E1"
+  kind: CardKind;
+  date: string | null; // when the fact happened / was published, as stated; null = unknown
+  claim: string;
+  sourceKeys: string[]; // always at least one
+  evidence: { sourceKey: string; excerpt: string }[]; // API-returned excerpts for this claim (may be empty)
+  stage: "discover" | "followup";
+  round: number;
+}
+
+export interface Person {
+  id: string; // "P1"
+  name: string;
+  role: string;
+  organisation: string;
+  whyRelevant: string;
+  sourceKeys: string[]; // always at least one
+  evidence: { sourceKey: string; excerpt: string }[];
+  stage: "discover" | "followup";
+}
+
+export type LeadPriority = "high" | "medium" | "low";
+export type LeadStatus = "open" | "resolved" | "unresolved" | "dead_end";
+
+export interface Lead {
+  id: string; // "L1"
+  priority: LeadPriority;
+  question: string;
+  why: string;
+  status: LeadStatus;
+  resolutionNote: string;
+  openedInRound: number; // 0 = discovery
+}
+
+export type CoverageStatus = "found" | "partial" | "not_found" | "not_applicable";
+
+export interface CoverageItem {
+  topic: string;
+  status: CoverageStatus;
+  note: string;
+  round: number;
+}
+
+export type RelevanceLevel = "strong" | "moderate" | "weak" | "none";
+
+export interface PreliminaryRelevance {
+  level: RelevanceLevel;
+  note: string;
+}
+
+export interface ResearchState {
+  input: WorkflowInput;
+  entity: EntityInfo | null;
+  cards: EvidenceCard[];
+  people: Person[];
+  leads: Lead[];
+  coverage: CoverageItem[];
+  relevance: PreliminaryRelevance | null;
+  sources: LedgerSource[];
+  followupRounds: number; // how many follow-up rounds have run
+  stages: StageLog[]; // research-stage logs (discover, followups)
+}
+
+// ---------------------------------------------------------------- gate (what to do next)
+
+export type NextStep =
+  | { action: "stop_entity"; reason: string }
+  | { action: "followup"; leadIds: string[]; focus: "leads" | "people" | "hook"; reason: string }
+  | { action: "synthesize"; reason: string };
+
+// ---------------------------------------------------------------- synthesis
+
+export type TriggerRank = "primary" | "secondary" | "hook";
+export type TriggerKind = "sales_trigger" | "conversation_hook";
+export type Recency = "under_3_months" | "3_to_6_months" | "6_to_12_months" | "over_12_months" | "unknown";
+export type AngleStrength = "strong" | "medium" | "weak" | "general_introduction";
+
+export interface Trigger {
+  id: string; // "T1"
+  rank: TriggerRank;
+  kind: TriggerKind;
+  priority: LeadPriority;
+  title: string;
+  recency: Recency;
+  scale: string; // numbers of sites / vehicles / value etc. or ""
+  fact: string; // FACT: what the evidence says
+  factCardIds: string[]; // evidence cards supporting the FACT
+  inference: string; // INFERENCE: reasoning, clearly separate
+  possibleOpportunity: string; // POSSIBLE OPPORTUNITY (a question to explore, not a pitch)
+  whyNow: string;
+}
+
+export interface RankedPerson {
+  personId: string; // refers to a Person in the research state
+  rank: number;
+  whyRelevant: string; // synthesis view; the evidence stays on the Person
+}
+
+export interface Angle {
+  id: string; // "A1"
+  title: string;
+  strength: AngleStrength;
+  triggerIds: string[];
+  cardIds: string[]; // the evidence this angle rests on
+  conversationQuestion: string; // the simple question the email will ask
+  whyItWorks: string;
+  recommended: boolean;
+}
+
+export interface Synthesis {
+  relevance: RelevanceLevel;
+  summary: string;
+  noMeaningfulAngleNote: string; // "" unless the honest answer is "no meaningful Teltonika angle found"
+  triggers: Trigger[];
+  people: RankedPerson[];
+  angles: Angle[];
+  gaps: string[];
+  droppedReferences: string[]; // IDs the model referenced that do not exist (removed by code)
+}
+
+// ---------------------------------------------------------------- email
+
+export type ContactChoice =
+  | { source: "researched"; personId: string; name: string; role: string }
+  | { source: "manual"; name: string; role: string };
+
+export type RelationshipKind = "new" | "existing";
+
+export interface RelationshipInput {
+  kind: RelationshipKind;
+  note: string; // e.g. "met at the CCW expo, spoke about RUTX50 last year"
+}
+
+export interface EmailDraft {
+  subject: string;
+  body: string;
+  originalSubject: string; // as generated; used to detect edits
+  originalBody: string;
+  usedCardIds: string[]; // evidence the email says it used (validated by code)
+  angleId: string;
+  contact: ContactChoice;
+  relationship: RelationshipInput;
+  generatedAt: string;
+  generation: number; // 1 for the first draft, 2 after one regeneration, ...
+}
+
+// ---------------------------------------------------------------- the one current workflow (localStorage)
+
+export interface Workflow {
+  version: 2;
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  state: ResearchState;
+  next: NextStep | null;
+  gateLog: { afterStage: string; action: NextStep["action"]; reason: string; at: string }[]; // why each step ran or did not
+  synthesis: Synthesis | null;
+  synthesisLog: StageLog | null;
+  selectedAngleId: string | null;
+  contact: ContactChoice | null;
+  relationship: RelationshipInput;
+  email: EmailDraft | null;
+  emailLogs: StageLog[]; // every email generation, so total cost stays honest
+}
+
+// ---------------------------------------------------------------- API shapes
 
 export interface ApiError {
   ok: false;
   error: string;
 }
 
-// ---- What the browser storage keeps (see src/lib/storage.ts) ----
-
-export interface StoredCompany {
-  id: string;
-  name: string;
-  website: string;
-  context: string; // company-level private context (persists between runs)
-  createdAt: string;
-  updatedAt: string;
+export interface ResearchStageResponse {
+  ok: true;
+  state: ResearchState;
+  next: NextStep;
+  log: StageLog;
 }
 
-export interface StoredResearch {
-  id: string;
-  companyId: string;
-  stage: "identify";
-  createdAt: string;
-  input: IdentifyInput; // includes the topic and a snapshot of the context used
-  result: IdentifyResult;
+export interface SynthesizeResponse {
+  ok: true;
+  synthesis: Synthesis;
+  log: StageLog;
+}
+
+export interface EmailResponse {
+  ok: true;
+  draft: EmailDraft;
+  log: StageLog;
 }

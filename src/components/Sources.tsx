@@ -1,0 +1,97 @@
+"use client";
+
+// Shared display pieces for sources and evidence. Display only.
+
+import type { EvidenceCard, LedgerSource } from "@/lib/types";
+
+/** [S3] chips that jump to the matching row of the source table. */
+export function SourceChips({ keys }: { keys: string[] }) {
+  return (
+    <>
+      {keys.map((k) => (
+        <a key={k} className="marker" href={`#source-${k}`}>
+          [{k}]
+        </a>
+      ))}
+    </>
+  );
+}
+
+function readStatus(s: LedgerSource): string {
+  if (s.fetched) return s.fetchKind === "pdf" ? "Read in full (PDF)" : "Read in full (page)";
+  if (s.fetchError) return `Fetch failed: ${s.fetchError}`;
+  return "Search result only";
+}
+
+export function SourceTable({ sources }: { sources: LedgerSource[] }) {
+  if (sources.length === 0) return <p className="muted">No sources were captured.</p>;
+  return (
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Title</th>
+          <th>URL</th>
+          <th>Read?</th>
+          <th>Cited</th>
+          <th>Page age</th>
+        </tr>
+      </thead>
+      <tbody>
+        {sources.map((s) => (
+          <tr key={s.key} id={`source-${s.key}`}>
+            <td>{s.key}</td>
+            <td>
+              {s.title ?? <span className="muted">(no title)</span>}
+              {s.citedExcerpts.length > 0 && (
+                <details>
+                  <summary>{s.citedExcerpts.length} excerpt(s) returned by the API</summary>
+                  <ul className="plain">
+                    {s.citedExcerpts.map((e, i) => (
+                      <li key={i}>&ldquo;{e}&rdquo;</li>
+                    ))}
+                  </ul>
+                </details>
+              )}
+            </td>
+            <td className="url">
+              <a href={s.url} target="_blank" rel="noopener noreferrer">
+                {s.url}
+              </a>
+            </td>
+            <td>{readStatus(s)}</td>
+            <td>{s.citedCount > 0 ? `${s.citedCount}×` : "–"}</td>
+            <td>{s.pageAge ?? "–"}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+/** One evidence card: the fact, its source chips, and the exact excerpts the API returned. */
+export function CardView({ card }: { card: EvidenceCard }) {
+  return (
+    <div className="card" id={`card-${card.id}`}>
+      <div>
+        <span className="badge">{card.id}</span> <span className="badge light">{card.kind.replace(/_/g, " ")}</span>{" "}
+        <span className="muted">{card.date ?? "undated"}</span>
+      </div>
+      <div>
+        {card.claim} <SourceChips keys={card.sourceKeys} />
+      </div>
+      {card.evidence.length > 0 && (
+        <details>
+          <summary>Excerpt(s) the API returned for this claim</summary>
+          <ul className="plain">
+            {card.evidence.map((e, i) => (
+              <li key={i}>
+                <span className="muted">{e.sourceKey}:</span> &ldquo;{e.excerpt}&rdquo;
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+    </div>
+  );
+}

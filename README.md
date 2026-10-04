@@ -1,36 +1,35 @@
 # Account Research & Outreach Tool
 
-Phase 1 prototype (Milestone 1). The product is defined in `docs/PRD.md` and `docs/USER_FLOW.md`; the build plan is in `docs/ARCHITECTURE.md`.
+Phase 1 prototype ("Q1" architecture). The product is defined in `docs/PRD.md` and `docs/USER_FLOW.md`; the build plan is in `docs/ARCHITECTURE.md`.
 
-**Milestone 1 does one thing:** you enter a company, and Claude (with web search and web fetch, guided by our intelligence files in `docs/intelligence/`) identifies it, classifies it, and shows the result with its sources and usage.
+**What it does:** you enter one company. The app researches it with Claude (web search and fetch, guided by the intelligence files in `docs/intelligence/`), shows Teltonika relevance, sales triggers, relevant people and conversation angles, every claim linked to its source. You pick an angle and a contact, and it drafts an email in your voice that you can edit, regenerate and copy.
 
-## Run it (on your own computer)
+## The pipeline (one request per stage)
 
-1. Install Node.js 20 or newer (https://nodejs.org). Check with `node -v`.
-2. In this folder, install the packages:
-   ```
-   npm install
-   ```
-3. Create your private settings file and add your key:
-   ```
-   cp .env.example .env.local
-   ```
-   Open `.env.local` and put your Anthropic API key after `ANTHROPIC_API_KEY=`.
-   `.env.local` is git-ignored. Never paste the key into chat, an issue, or a commit.
-4. Start the app:
-   ```
-   npm run dev
-   ```
-5. Open http://localhost:3000, type a company name, click **Research**.
+| Stage | Model | Web tools | Intelligence files (read from disk on every run) |
+|---|---|---|---|
+| Discover | Sonnet 5.5 | search + fetch | 01, 02 |
+| Follow-up (only if the gate says so) | Sonnet 5.5 | search + fetch | 01, 02 |
+| Synthesis | Opus 5.5 | none | 01, 02, 03 |
+| Email | Sonnet 5.5 | none | 04, 05 |
 
-Each click makes real, paid Anthropic API calls (typically cents to a couple of dollars; the page shows usage and an estimate). In the Anthropic Console, set a monthly spend limit and make sure web search is enabled for your organisation.
+Models, limits and gate rules live in `src/lib/config.ts`. `06_LEARNING_RULES.md` is never sent. Only ONE company/workflow is kept, in the browser's `localStorage`. No database.
+
+## Run it on your own computer
+
+1. Node.js 20 or newer. Check with `node -v`.
+2. `npm install`
+3. `cp .env.example .env.local` and put your Anthropic API key after `ANTHROPIC_API_KEY=`. `.env.local` is git-ignored. Never paste the key into chat or a commit.
+4. `npm run dev`, then open http://localhost:3000
+
+Each research run makes real, paid Anthropic calls. The page shows an estimated cost per stage and in total (an estimate, not a bill; the Anthropic Console Usage page is authoritative).
 
 ## Other commands
 
-- `npm test`: unit tests for the source ledger and cost estimate (fake data, free, no key needed)
-- `npm run typecheck`: TypeScript check
-- `npm run build`: production build check
+- `npm test`: offline tests with fake API data (free, no key needed), including a full fake run of the whole pipeline
+- `npm run typecheck`
+- `npm run build`
 
-## Do not deploy this yet
+## Deploying (Vercel)
 
-There is no login. Anyone who could open a deployed copy could spend your Anthropic money. Run it locally. Add an access gate before any deployment.
+Set `ANTHROPIC_API_KEY` as a Vercel environment variable (never in the repo) and keep Vercel Authentication on: there is no login of our own, so anyone who can open the site can spend your Anthropic money. Each stage is a separate request, so each stays within the 300 s function limit.

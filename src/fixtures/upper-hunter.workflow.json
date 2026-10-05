@@ -1,0 +1,2098 @@
+{
+  "version": 2,
+  "id": "6bc31e98-5fea-4e86-a06f-940a7fe24a89",
+  "createdAt": "2026-10-05T04:34:20.898Z",
+  "updatedAt": "2026-10-05T04:43:51.876Z",
+  "state": {
+    "input": {
+      "companyName": "Upper Hunter Shire Council",
+      "website": "",
+      "context": "",
+      "topic": ""
+    },
+    "entity": {
+      "match": "Confirmed",
+      "matchNote": "Confirmed - Upper Hunter Shire Council is an NSW local government authority. Its own contact page gives ABN 17 261 839 740 and 135 Liverpool Street, Scone, and no other organisation matches the name.",
+      "name": "Upper Hunter Shire Council",
+      "website": "https://www.upperhunter.nsw.gov.au",
+      "tradingLegal": "not applicable - the council trades under its own legal name (abbreviated \"UHSC\" on its website); High confidence",
+      "industry": "Smart City - a regional NSW council that runs water, sewer, roads and community infrastructure (Energy & Utilities is a secondary fit because of its water and sewer assets)",
+      "clientType": "End User - the council operates its own water, sewer and IT networks. Its WAN and firewall work is outsourced to Atturra.",
+      "summary": "Upper Hunter Shire Council is the local government authority for the Scone, Aberdeen, Merriwa, Cassilis and Murrurundi area of NSW. It operates five water supply schemes and sewerage systems, with offices in Scone, Merriwa and Murrurundi. It has a small in-house IT team supported by Atturra for networking and infrastructure.",
+      "contextCheck": "none supplied",
+      "sourceKeys": []
+    },
+    "cards": [
+      {
+        "id": "E1",
+        "kind": "company_profile",
+        "date": null,
+        "claim": "The council's contact page gives its ABN as 17-261-839-740 and its address as 135 Liverpool Street, Scone NSW 2337.",
+        "sourceKeys": [
+          "S47"
+        ],
+        "evidence": [
+          {
+            "sourceKey": "S47",
+            "excerpt": "ABN: 17-261-839-740 Address: 135 Liverpool Street Scone NSW 2337"
+          }
+        ],
+        "grade": "tool_source",
+        "stage": "discover",
+        "round": 0
+      },
+      {
+        "id": "E2",
+        "kind": "infrastructure",
+        "date": null,
+        "claim": "Council operates five water supply schemes serving Scone, Aberdeen, Merriwa, Cassilis and Murrurundi. A water treatment plant and Aberdeen back feed are described as proposed for the future.",
+        "sourceKeys": [
+          "S26"
+        ],
+        "evidence": [
+          {
+            "sourceKey": "S26",
+            "excerpt": "operates five water supply schemes for servicing the townships of Scone, Aberdeen, Merriwa, Cassilis and Murrurundi"
+          }
+        ],
+        "grade": "tool_source",
+        "stage": "discover",
+        "round": 0
+      },
+      {
+        "id": "E3",
+        "kind": "infrastructure",
+        "date": "2020",
+        "claim": "In 2020 the council completed a $14 million pipeline and pumping stations to move potable water from Scone to Murrurundi.",
+        "sourceKeys": [
+          "S26"
+        ],
+        "evidence": [
+          {
+            "sourceKey": "S26",
+            "excerpt": "through a $14 million pipeline and pumping stations to transfer potable water from Scone to Murrurundi"
+          }
+        ],
+        "grade": "tool_source",
+        "stage": "discover",
+        "round": 0
+      },
+      {
+        "id": "E4",
+        "kind": "technology",
+        "date": "2022-06",
+        "claim": "The June 2022 Infrastructure Services Committee agenda lists a water and sewer SCADA/Telemetry upgrade at all sites in Merriwa and Cassilis, shown as 98% complete with final set-up work remaining. The listed budget was $71,000 against $83,129.",
+        "sourceKeys": [
+          "S31"
+        ],
+        "evidence": [
+          {
+            "sourceKey": "S31",
+            "excerpt": "Upgrade of telemetry at all"
+          }
+        ],
+        "grade": "tool_source",
+        "stage": "discover",
+        "round": 0
+      },
+      {
+        "id": "E5",
+        "kind": "vendor_partner",
+        "date": null,
+        "claim": "Atturra's client story says the council's in-house Information Services team uses Atturra for networking and infrastructure projects. Atturra helped manage and troubleshoot 40-plus sites, internet access across the WAN, firewalling, and a refresh of core and edge switches.",
+        "sourceKeys": [
+          "S11"
+        ],
+        "evidence": [
+          {
+            "sourceKey": "S11",
+            "excerpt": "Assisted with management and troubleshooting of 40 plus sites."
+          }
+        ],
+        "grade": "tool_source",
+        "stage": "discover",
+        "round": 0
+      },
+      {
+        "id": "E6",
+        "kind": "technology",
+        "date": null,
+        "claim": "After security breaches the council split its IT systems across two supplier WANs, with some sites also using 4G for failover where appropriate.",
+        "sourceKeys": [
+          "S11"
+        ],
+        "evidence": [
+          {
+            "sourceKey": "S11",
+            "excerpt": "with some sites also utilising 4G for failover where appropriate"
+          }
+        ],
+        "grade": "tool_source",
+        "stage": "discover",
+        "round": 0
+      },
+      {
+        "id": "E7",
+        "kind": "governance_doc",
+        "date": "2026-06-29",
+        "claim": "At its 29 June 2026 meeting, council adopted the Delivery Program 2026 to 2029 and Operational Plan 2026 to 2027. These include the annual budget and capital works program.",
+        "sourceKeys": [
+          "S22"
+        ],
+        "evidence": [
+          {
+            "sourceKey": "S22",
+            "excerpt": "adopted the Delivery Program 2026 to 2029 and Operational Plan 2026 to 2027 following public exhibition"
+          }
+        ],
+        "grade": "tool_source",
+        "stage": "discover",
+        "round": 0
+      },
+      {
+        "id": "E8",
+        "kind": "governance_doc",
+        "date": "2026-04",
+        "claim": "The draft 2026–27 Delivery Program and Operational Plan was on public exhibition from 30 April to 29 May 2026. The PDF is 41MB.",
+        "sourceKeys": [
+          "S1"
+        ],
+        "evidence": [
+          {
+            "sourceKey": "S1",
+            "excerpt": "placed its Draft Delivery Program and Operational Plan (DPOP) for 2026–2027 on public exhibition from 11:00am, Thursday 30 April 2026"
+          }
+        ],
+        "grade": "tool_source",
+        "stage": "discover",
+        "round": 0
+      },
+      {
+        "id": "E9",
+        "kind": "contract_tender",
+        "date": null,
+        "claim": "The contractor Abergeldie delivers an annual sewer relining package for the council, renewing up to 4km of sewer pipeline a year. The work includes CCTV inspections. This is civil work with no connectivity content.",
+        "sourceKeys": [
+          "S30"
+        ],
+        "evidence": [
+          {
+            "sourceKey": "S30",
+            "excerpt": "renews up to 4km of sewer pipelines annually in Upper Hunter using trenchless methods to improve network serviceability"
+          }
+        ],
+        "grade": "tool_source",
+        "stage": "discover",
+        "round": 0
+      },
+      {
+        "id": "E10",
+        "kind": "governance_doc",
+        "date": "2026-09-28",
+        "claim": "The 28 September 2026 Ordinary Meeting agenda reports on the Infrastructure Services Committee meeting of 8 September 2026. It names Stephen Hitchens as Director Infrastructure Services and the responsible officer, with Emma Howard (Infrastructure Services Support Officer) as report preparer.",
+        "sourceKeys": [
+          "S62"
+        ],
+        "evidence": [
+          {
+            "sourceKey": "S62",
+            "excerpt": "Stephen Hitchens - Director Infrastructure Services"
+          }
+        ],
+        "grade": "tool_source",
+        "stage": "followup",
+        "round": 1
+      },
+      {
+        "id": "E11",
+        "kind": "project",
+        "date": "2025",
+        "claim": "Council's water supply web page says the joint Scone/Muswellbrook water treatment facility would cost about $80 million for the water plant and a further $50 million to replace the ageing sewage treatment plant. Council says these projects are not affordable without significant external grant funding.",
+        "sourceKeys": [
+          "S64"
+        ],
+        "evidence": [
+          {
+            "sourceKey": "S64",
+            "excerpt": "it would cost around $80 million for the water plant and a further $50 million to replace the ageing sewage treatment plant"
+          }
+        ],
+        "grade": "quote_verified",
+        "stage": "followup",
+        "round": 1
+      },
+      {
+        "id": "E12",
+        "kind": "infrastructure",
+        "date": "2025",
+        "claim": "Council supplies Scone, Aberdeen and Murrurundi directly from Glenbawn Dam. The only treatment is chlorination, with UV disinfection coming soon, and there is no filtration plant. Since 2023 it has worked with Muswellbrook Shire Council on a joint water treatment facility.",
+        "sourceKeys": [
+          "S64"
+        ],
+        "evidence": [
+          {
+            "sourceKey": "S64",
+            "excerpt": "Since 2023, UHSC and MSC have been working together on the idea of a joint water treatment facility."
+          }
+        ],
+        "grade": "quote_verified",
+        "stage": "followup",
+        "round": 1
+      },
+      {
+        "id": "E13",
+        "kind": "news",
+        "date": "2025",
+        "claim": "Council's funding letter says the Scone, Aberdeen and Murrurundi supply had two extended boil water alerts in 2025. The first lasted five weeks from June, and the second began on 6 August and was expected to run up to eight weeks. It puts the estimated capital cost for Upper Hunter Shire alone at $78–$80 million.",
+        "sourceKeys": [
+          "S64"
+        ],
+        "evidence": [
+          {
+            "sourceKey": "S64",
+            "excerpt": "The estimated capital cost for UHSC is $78–$80 million."
+          }
+        ],
+        "grade": "quote_verified",
+        "stage": "followup",
+        "round": 1
+      },
+      {
+        "id": "E14",
+        "kind": "project",
+        "date": "2023-10",
+        "claim": "The October 2023 Infrastructure Services Committee agenda lists Scone Water Treatment Plant (joint with Muswellbrook Shire Council) under Water & Sewer capital works. It says BECA had done a preliminary feasibility review of the Brushy Hill site.",
+        "sourceKeys": [
+          "S74"
+        ],
+        "evidence": [
+          {
+            "sourceKey": "S74",
+            "excerpt": "BECA has undertaken a preliminary feasibility review of the Brushy Hill site"
+          }
+        ],
+        "grade": "tool_source",
+        "stage": "followup",
+        "round": 1
+      },
+      {
+        "id": "E15",
+        "kind": "project",
+        "date": "2023-04",
+        "claim": "The April 2023 Infrastructure Services Committee agenda says the Scone Sewerage Treatment Plant is proposed to be replaced or upgraded, depending on funding and technical capability.",
+        "sourceKeys": [
+          "S29"
+        ],
+        "evidence": [
+          {
+            "sourceKey": "S29",
+            "excerpt": "The Scone Sewerage Treatment Plant is proposed to be replaced or upgraded depending on funding and/or technical capability of the existing plant."
+          }
+        ],
+        "grade": "tool_source",
+        "stage": "followup",
+        "round": 1
+      }
+    ],
+    "people": [
+      {
+        "id": "P1",
+        "name": "Stephen Hitchens",
+        "role": "Director Infrastructure Services (named as responsible officer in September 2026)",
+        "organisation": "Upper Hunter Shire Council",
+        "whyRelevant": "Responsible officer for Infrastructure Services Committee reports, which cover the water and sewer works program.",
+        "sourceKeys": [
+          "S62"
+        ],
+        "evidence": [
+          {
+            "sourceKey": "S62",
+            "excerpt": "Stephen Hitchens - Director Infrastructure Services"
+          }
+        ],
+        "grade": "tool_source",
+        "stage": "followup"
+      },
+      {
+        "id": "P2",
+        "name": "Grahame Wilson",
+        "role": "Manager Water & Sewer (as of October 2023; current status not confirmed)",
+        "organisation": "Upper Hunter Shire Council",
+        "whyRelevant": "Named author of the October 2023 Water & Sewer works program report, which covers the water treatment plant feasibility.",
+        "sourceKeys": [
+          "S74"
+        ],
+        "evidence": [
+          {
+            "sourceKey": "S74",
+            "excerpt": "Grahame Wilson - Manager Water & Sewer"
+          }
+        ],
+        "grade": "tool_source",
+        "stage": "followup"
+      }
+    ],
+    "leads": [
+      {
+        "id": "L1",
+        "priority": "high",
+        "question": "Do the adopted 2026–27 Operational Plan or capital works program include SCADA, telemetry, water treatment plant or Aberdeen back-feed, or sewage treatment plant projects, and what communications do they specify?",
+        "why": "The 41MB DPOP could not be read within budget, and a proposed water treatment plant is the largest possible new connected-asset project.",
+        "status": "unresolved",
+        "resolutionNote": "The adopted 2026–27 DPOP and the 9 December 2025 Infrastructure Services agenda only came back as encoded PDF data, so I could not confirm whether SCADA, telemetry or comms are specified. The water treatment plant (about $80M) and the sewage treatment plant replacement (about $50M) are described as unfunded and dependent on grants.",
+        "openedInRound": 0
+      },
+      {
+        "id": "L2",
+        "priority": "high",
+        "question": "What is the current status of the Merriwa and Cassilis telemetry upgrade, and what comms (radio or cellular) do the council's water and sewer telemetry sites use?",
+        "why": "The 2022 agenda shows the upgrade was nearly complete but does not say what communications the sites use.",
+        "status": "unresolved",
+        "resolutionNote": "I found no current-status or comms detail (radio or cellular) for the Merriwa/Cassilis telemetry upgrade. The last web search was refused because the tool-use limit was exceeded.",
+        "openedInRound": 0
+      },
+      {
+        "id": "L3",
+        "priority": "medium",
+        "question": "Who is the council's Manager Water & Sewer, and who is the Director Infrastructure Services or IT lead responsible for water and sewer?",
+        "why": "No named officer was captured in this run. The recent Infrastructure Services Committee agendas (for example the 9 December 2025 one) should name the report authors.",
+        "status": "unresolved",
+        "resolutionNote": "Stephen Hitchens is named as Director Infrastructure Services in the 28 September 2026 meeting agenda. The current Manager Water & Sewer was not found; Grahame Wilson held the role in October 2023 and Greg Longman in March 2022.",
+        "openedInRound": 0
+      },
+      {
+        "id": "L4",
+        "priority": "medium",
+        "question": "Is the Atturra relationship still current, and are the 4G failover sites standardised on particular hardware?",
+        "why": "The Atturra page is undated (about 2024 by age) and does not name any hardware.",
+        "status": "open",
+        "resolutionNote": "",
+        "openedInRound": 0
+      },
+      {
+        "id": "L5",
+        "priority": "low",
+        "question": "Are there recent tenders on the NSW eTendering portal or on australiantenders.com.au for the council covering communications, CCTV or SCADA?",
+        "why": "No relevant tender was identified in this run.",
+        "status": "open",
+        "resolutionNote": "",
+        "openedInRound": 0
+      },
+      {
+        "id": "L6",
+        "priority": "high",
+        "question": "Does the 8 September 2026 Infrastructure Services Committee report, or the adopted 2026–27 DPOP capital program, include telemetry, SCADA or comms items for water and sewer sites?",
+        "why": "This would show whether a connectivity upgrade is budgeted. The PDFs were returned as encoded data and could not be read here.",
+        "status": "open",
+        "resolutionNote": "",
+        "openedInRound": 1
+      },
+      {
+        "id": "L7",
+        "priority": "medium",
+        "question": "Who is the current Manager Water & Sewer, and are they named in the monthly Infrastructure Services works program reports for 2026?",
+        "why": "The last names found are Grahame Wilson (2023) and Greg Longman (2022), so the current holder is unconfirmed.",
+        "status": "open",
+        "resolutionNote": "",
+        "openedInRound": 1
+      },
+      {
+        "id": "L8",
+        "priority": "medium",
+        "question": "Is the UV disinfection installation at the Scone water supply under way, and does it include new control or telemetry equipment?",
+        "why": "The water page says UV disinfection is coming soon. It is a near-term connected-asset project with no comms detail found.",
+        "status": "open",
+        "resolutionNote": "",
+        "openedInRound": 1
+      }
+    ],
+    "coverage": [
+      {
+        "topic": "entity",
+        "status": "found",
+        "note": "Already confirmed in the research state.",
+        "round": 1
+      },
+      {
+        "topic": "projects_and_contracts",
+        "status": "partial",
+        "note": "Found the water treatment plant, sewage treatment plant and UV disinfection context. No SCADA or comms tender was found.",
+        "round": 1
+      },
+      {
+        "topic": "government_and_governance_documents",
+        "status": "partial",
+        "note": "Read the council's own page text and search extracts from the 2023 and 2026 agendas. The DPOP and the December 2025 and September 2026 PDFs came back as encoded data.",
+        "round": 1
+      },
+      {
+        "topic": "vendor_and_partner_pages",
+        "status": "not_found",
+        "note": "No new vendor or partner pages were checked in this run.",
+        "round": 1
+      },
+      {
+        "topic": "customer_projects",
+        "status": "not_applicable",
+        "note": "The council is an end user.",
+        "round": 1
+      },
+      {
+        "topic": "competitor_technology",
+        "status": "not_found",
+        "note": "No telemetry, SCADA or router vendor was named in anything readable.",
+        "round": 1
+      },
+      {
+        "topic": "industry_sources",
+        "status": "not_found",
+        "note": "Only the council's own documents were used.",
+        "round": 1
+      },
+      {
+        "topic": "people",
+        "status": "partial",
+        "note": "Found Director Infrastructure Services Stephen Hitchens. The current Manager Water & Sewer is not confirmed.",
+        "round": 1
+      },
+      {
+        "topic": "history",
+        "status": "partial",
+        "note": "Added the 2023 feasibility and sewage treatment plant history for the water plant project.",
+        "round": 1
+      },
+      {
+        "topic": "conversation_hooks",
+        "status": "partial",
+        "note": "Possible hooks are the unfunded water treatment plant and sewage treatment plant projects, and the 2025 boil water alerts. Neither has a confirmed connectivity component.",
+        "round": 1
+      }
+    ],
+    "relevance": {
+      "level": "moderate",
+      "note": "Distributed water and sewer assets with past telemetry upgrades, about 40 WAN sites with 4G failover in places, and large unfunded water and sewage plant projects. No confirmed current comms project was found."
+    },
+    "sources": [
+      {
+        "key": "S1",
+        "url": "https://www.upperhunter.nsw.gov.au/Public-notices/Delivery-Program-and-Operational-Plan-2026-27",
+        "title": "Delivery Program and Operational Plan 2026 - 27 - UHSC",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S2",
+        "url": "https://policycommons.net/artifacts/19505042/upper-hunter-shire-delivery-program-and-operational-plan-2024-2025/20405576/",
+        "title": "Upper Hunter Shire Delivery Program and Operational Plan 2024-2025",
+        "pageAge": "365 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S3",
+        "url": "https://upperlachlan.nsw.gov.au/wp-content/uploads/2026/04/DRAFT-Operational-Plan-2026-2027-Completed.pdf",
+        "title": "Operational Plan 2026-2027",
+        "pageAge": "187 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S4",
+        "url": "https://www.upperhunter.nsw.gov.au/files/assets/public/v/1/council/documents-and-policies/key-planning-documents/2021/dpop-final-updated.pdf",
+        "title": "Upper Hunter Shire Council DELIVERY PROGRAM 2017/2018 - 2021/2022",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S5",
+        "url": "https://www.yoursay.wollondilly.nsw.gov.au/draft-delivery-program-and-operational-plan-2026-27",
+        "title": "Draft Delivery Program and Operational Plan 2026/27",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S6",
+        "url": "https://www.upperhunter.nsw.gov.au/files/assets/public/v/1/council/meetings/council-meetings/oc_24042023_agn_at.pdf",
+        "title": "A Quality Rural Lifestyle - in a vibrant, caring and sustainable community",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S7",
+        "url": "https://yoursay.hornsby.nsw.gov.au/draft-2026-2030-delivery-program-and-202627-operational-plan",
+        "title": "Draft 2026-2030 Delivery Program and 2026/27 Operational Plan",
+        "pageAge": "117 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S8",
+        "url": "https://www.kempsey.nsw.gov.au/files/sharedassets/public/v/1/docs/departments/corporate-performance/planning-amp-reporting/2026-27/11-2-1-2026-27-operational-plan.pdf",
+        "title": "K E M P S E Y . N S W . G O V . A U 2026/27 OPERATIONAL PLAN",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S9",
+        "url": "https://www.newcastleherald.com.au/story/9163600/hunter-council-considers-service-cuts-due-to-cash-flow-concerns/",
+        "title": "Hunter council considers service cuts due to cash flow concerns",
+        "pageAge": "248 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S10",
+        "url": "https://hdp-au-prod-app-newcastle-haveyoursay-files.s3.ap-southeast-2.amazonaws.com/3017/7744/7491/Draft_DN2040_2026-27_PE_version_V2.pdf",
+        "title": "Delivery Program 2025-2029 and Operational Plan 2026/2027",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S11",
+        "url": "https://atturra.com/au-en/client-stories/upper-hunter-shire-council-it-partnership/",
+        "title": "Upper Hunter Shire Council Achieves Strategic Objectives Through Right-Sized IT Partnership - Atturra",
+        "pageAge": "894 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S12",
+        "url": "https://scone.com.au/thecommunity/communityresources/government-services/local-government/upper-hunter-shire-council/",
+        "title": "Upper Hunter Shire Council - scone.com.au",
+        "pageAge": "3921 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S13",
+        "url": "https://hunterjo.nsw.gov.au/councils/upper-hunter-shire-council/",
+        "title": "Upper Hunter Shire Council - Hunter Joint Organisation",
+        "pageAge": "2355 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S14",
+        "url": "https://www.criticalcomms.com.au/content/utilities/article/council-commissions-cctv-and-wi-fi-network-901908739",
+        "title": "Council commissions CCTV and Wi-Fi network",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S15",
+        "url": "https://iotportal.co.uk/iot-hardware/4g-connectivity-cctv-towers/",
+        "title": "4G Connectivity for Deployable CCTV Towers",
+        "pageAge": "177 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S16",
+        "url": "https://www.grenfellrecord.com.au/news/better-internet-now-available-across-most-of-weddin-shire-nnjgcm8c",
+        "title": "Better internet now available across most of Weddin Shire",
+        "pageAge": "81 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S17",
+        "url": "http://lgam.wikidot.com/upper-hunter-shire-council",
+        "title": "Upper Hunter Shire Council - LGAM Knowledge Base - Wikidot",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S18",
+        "url": "https://www.4sitecctv.com/",
+        "title": "4 Site CCTV Limited - Solar Powered CCTV Towers, IOT, Wifi, 4G",
+        "pageAge": "1425 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S19",
+        "url": "https://4gcctv.net/",
+        "title": "4G CCTV",
+        "pageAge": "165 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S20",
+        "url": "https://ruralview.uk/",
+        "title": "RuralView",
+        "pageAge": "232 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S21",
+        "url": "https://www.upperhunter.nsw.gov.au/News/March-2026-Council-Meeting-Recap",
+        "title": "March 2026 - Council Meeting Recap - UHSC",
+        "pageAge": "187 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S22",
+        "url": "https://www.upperhunter.nsw.gov.au/News/Council-Meeting-Recap-June-2026",
+        "title": "Council Meeting Recap June 2026 - UHSC",
+        "pageAge": "97 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S23",
+        "url": "https://www.upperhunter.nsw.gov.au/News/Council-Meeting-Recap-28-April-2026",
+        "title": "Council Meeting Recap - 28 April 2026 - UHSC",
+        "pageAge": "157 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S24",
+        "url": "https://www.publicnow.com/view/6C51C7C8C67653C5F265A60B606EF0FD9EBDE4E8",
+        "title": "Upper Hunter Shire Council (via Public) / Upper Hunter Shire Council Meeting",
+        "pageAge": "676 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S25",
+        "url": "https://www.upperhunter.nsw.gov.au/files/assets/public/v/1/council/meetings/council-meetings/oc_23022026_agn_at.pdf",
+        "title": "A Quality Rural Lifestyle - in a vibrant, caring and sustainable community",
+        "pageAge": "224 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S26",
+        "url": "https://www.upperhunter.nsw.gov.au/Residents/Water-and-Sewage/Water",
+        "title": "Water - UHSC - Upper Hunter Shire Council",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S27",
+        "url": "https://www.upperhunter.nsw.gov.au/Council/Council-and-Committee-Meetings",
+        "title": "Council and Committee Meetings - UHSC",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S28",
+        "url": "https://www.upperhunter.nsw.gov.au/News/Upper-Hunter-Shire-Council-Meeting-–-Monday-25-November-2024",
+        "title": "Upper Hunter Shire Council Meeting – Monday, 25 November 2024",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S29",
+        "url": "https://www.upperhunter.nsw.gov.au/files/assets/public/council/meetings/committee-meetings/is/isc_11042023_agn_at.pdf",
+        "title": "isc 11042023 agn at",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S30",
+        "url": "https://abergeldie.com/projects/upper-hunter-shire-council-sewer-relining-program",
+        "title": "Upper Hunter Shire Council Sewer Relining Program",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S31",
+        "url": "https://www.upperhunter.nsw.gov.au/files/assets/public/v/1/council/meetings/committee-meetings/is/infrastructure-services-committee-meeting-agenda-14-june-2022.pdf",
+        "title": "A Quality Rural Lifestyle - in a vibrant, caring and sustainable community",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S32",
+        "url": "https://allianceautomation.com.au/project/telemetry-scada-upgrade/",
+        "title": "Telemetry & SCADA Upgrade",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S33",
+        "url": "https://businesspapers.cgrc.nsw.gov.au/Open/2022/07/CO_20220726_AGN_2309_AT_files/CO_20220726_AGN_2309_AT_Attachment_11442_2.PDF",
+        "title": "Proposed Design and Installation of SCADA system for Water and Sewerage Assets",
+        "pageAge": "1532 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S34",
+        "url": "https://citizenportal.ai/articles/8760025/city-approves-60322-scada-upgrade-for-water-and-sewer-monitoring",
+        "title": "City approves $60,322 SCADA upgrade for water and sewer monitoring",
+        "pageAge": "321 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S35",
+        "url": "https://www.unitywater.com/about-us/projects-in-your-area/supervisory-control-and-data-acquisition-scada",
+        "title": "Supervisory Control and Data Acquisition SCADA",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S36",
+        "url": "https://adamwoodland.com/water-utility-scada-cybersecurity/",
+        "title": "Water Utility SCADA and OT Cybersecurity",
+        "pageAge": "2 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S37",
+        "url": "https://citizenportal.ai/articles/7959262/South-Carolina/Pickens/Pickens/Utilities-staff-seek-SCADA-upgrade-and-meters-replacement-to-cut-losses-and-speed-response",
+        "title": "Utilities staff seek SCADA upgrade and meters replacement to cut losses and speed response",
+        "pageAge": "187 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S38",
+        "url": "https://www.upperhunter.nsw.gov.au/files/sharedassets/public/v/1/council-meetings/agendas/isc_09122025_agn_at.pdf",
+        "title": "A Quality Rural Lifestyle - in a vibrant, caring and sustainable community",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": true,
+        "fetchKind": "pdf",
+        "retrievedAt": "2026-10-01T03:42:52.959000+00:00",
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S39",
+        "url": "https://www.ipart.nsw.gov.au/sites/default/files/cm9_documents/Final-Report-Upper-Hunter-Shire-Council-Special-Variation-Application-for-2025-26-May-2025.PDF",
+        "title": "Executive summary Upper Hunter Shire Council Page",
+        "pageAge": "497 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S40",
+        "url": "https://www.upperhunter.nsw.gov.au/files/assets/public/v/2/council/documents-and-policies/other-documents/srv-background-information-final-copy.pdf",
+        "title": "Consultation closes July 15 Special Rate Variation Background Paper Outline",
+        "pageAge": "447 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S41",
+        "url": "https://www.upperhunter.nsw.gov.au/files/assets/public/v/1/council/meetings/committee-meetings/is/isc_080322_minutes.pdf",
+        "title": "Nsw",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S42",
+        "url": "https://www.upperhunter.nsw.gov.au/files/assets/public/v/2/plan-and-build/development-cont-plans/section-64-development-servicing-plan-for-water-sewer-2017-2.pdf",
+        "title": "DEVELOPMENT SERVICING PLAN FOR WATER SUPPLY AND SEWERAGE 2017",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S43",
+        "url": "https://www.upperhunter.nsw.gov.au/Home",
+        "title": "Upper Hunter Shire Council",
+        "pageAge": "1455 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S44",
+        "url": "https://pub-durhamregion.escribemeetings.com/filestream.ashx?DocumentId=8661",
+        "title": "2026 Consolidated Water Supply and Sanitary Sewerage Systems",
+        "pageAge": "298 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S45",
+        "url": "https://www.zoominfo.com/c/upper-hunter-shire-council/352127937",
+        "title": "Upper Hunter Shire Council - Overview, News & Similar companies",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S46",
+        "url": "https://creditorwatch.com.au/credit/profile/17261839740",
+        "title": "UPPER HUNTER SHIRE COUNCIL - ABN 17261839740 - Business Profile / Credit Report",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S47",
+        "url": "https://upperhunter.nsw.gov.au/contact.aspx",
+        "title": "Contact Upper Hunter Shire Council",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S48",
+        "url": "https://www.wikidata.org/wiki/Q820332",
+        "title": "Upper Hunter Shire - Wikidata",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S49",
+        "url": "https://au.linkedin.com/company/upper-hunter-shire-council",
+        "title": "Upper Hunter Shire Council",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S50",
+        "url": "https://en.wikipedia.org/wiki/Upper_Hunter_Shire",
+        "title": "Upper Hunter Shire",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S51",
+        "url": "https://rocketreach.co/upper-hunter-shire-council-profile_b5ea5694f42e7940",
+        "title": "Upper Hunter Shire Council Information",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S52",
+        "url": "https://growjo.com/company/Upper_Hunter_Shire_Council",
+        "title": "Upper Hunter Shire Council: Revenue, Competitors, Alternatives",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S53",
+        "url": "https://www.huntervalleynews.net.au/story/6678297/boil-water-alert-issued-in-upper-hunter/",
+        "title": "Upper Hunter Shire Council issues boil water alert for Scone and Murrurundi, while Aberdeen, Merriwa and Cassilis unaffected",
+        "pageAge": "2396 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S54",
+        "url": "https://data.nsw.gov.au/data/organization/upper-hunter-shire-council",
+        "title": "Upper Hunter Shire Council - Organizations - Data.NSW",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S55",
+        "url": "https://www.huntervalleynews.net.au/story/6240847/proactive-response-to-ongoing-drought-conditions/",
+        "title": "Aberdeen, Merriwa, Scone and Cassilis to join Denman, Murrurundi, Muswellbrook and Singleton on mandatory water restrictions",
+        "pageAge": "2658 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S56",
+        "url": "https://www.australiantenders.com.au/issuer/7987/tenders/upper-hunter-shire-council",
+        "title": "Tenders for Upper Hunter Shire Council",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S57",
+        "url": "https://www.newcastleherald.com.au/story/6773996/water-restrictions-to-drop-from-level-six-to-level-two-in-murrurundi/",
+        "title": "Water restrictions: Murrurundi pipeline prompts Upper Hunter Shire Council to ease from level six to level two",
+        "pageAge": "2320 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S58",
+        "url": "https://www.huntervalleynews.net.au/story/6353573/upper-hunter-water-wise-message-starting-to-work/",
+        "title": "Huntervalleynews",
+        "pageAge": "2595 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S59",
+        "url": "https://www.upperhunter.nsw.gov.au/Residents/Water-and-Sewage/Water/Water-Quality",
+        "title": "Water Quality - UHSC",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S60",
+        "url": "https://www.newcastleherald.com.au/story/8452632/upper-hunter-shire-council-faces-scrutiny-over-murrurundi-dam-and-delays/",
+        "title": "Upper Hunter Shire Council faces scrutiny over Murrurundi Dam and delays",
+        "pageAge": "1028 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S61",
+        "url": "https://www.upperhunter.nsw.gov.au/News/Ordinary-Council-Meeting-Summary-–-29-April-2024",
+        "title": "Ordinary Council Meeting Summary – 29 April 2024",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S62",
+        "url": "https://www.upperhunter.nsw.gov.au/files/assets/public/v/2/council/meetings/council-meetings/oc_28092026_agn_at-v4.pdf",
+        "title": "A Quality Rural Lifestyle - in a vibrant, caring and sustainable community",
+        "pageAge": "7 days ago",
+        "seenInSearch": true,
+        "fetched": true,
+        "fetchKind": "pdf",
+        "retrievedAt": "2026-10-05T04:36:36.824397",
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S63",
+        "url": "https://www.knysna.gov.za/wp-content/uploads/2026/05/Age-05-May-2026.pdf",
+        "title": "INFRASTRUCTURE SERVICES COMMITTEE MEETING AGENDA 05 MAY 2026",
+        "pageAge": "153 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S64",
+        "url": "https://www.upperhunter.nsw.gov.au/Residents/Water-and-Sewage/Water/Boil-Water-Alert",
+        "title": "Boil Water Alert - UHSC - Upper Hunter Shire Council",
+        "pageAge": "383 days ago",
+        "seenInSearch": true,
+        "fetched": true,
+        "fetchKind": "text",
+        "retrievedAt": "2026-09-27T21:55:37.618000+00:00",
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S65",
+        "url": "https://www.zoominfo.com/pic/upper-hunter-shire-council/352127937",
+        "title": "Upper Hunter Shire Council: Employee Directory",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S66",
+        "url": "https://www.upperhunter.nsw.gov.au/files/sharedassets/public/v/1/council-meetings/agendas/isc_13052025_agn_at.pdf",
+        "title": "isc 13052025 agn at",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S67",
+        "url": "https://www.zoominfo.com/p/Raghavendra-Upadhyaya/11502911689",
+        "title": "Contact Raghavendra Upadhyaya, Email: ****@upperhunter.nsw.gov.au & Phone Number",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S68",
+        "url": "https://www.upperhunter.nsw.gov.au/files/assets/public/v/1/council/meetings/committee-meetings/is/isc_13092022_min.pdf",
+        "title": "Minutes of Infrastructure Services Committee",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchError": null,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S69",
+        "url": "https://www.zoominfo.com/p/Steve-Hitchens/633394974",
+        "title": "Contact Steve Hitchens, Email: ****@upperhunter.nsw.gov.au & Phone Number",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S70",
+        "url": "https://www.upperhunter.nsw.gov.au/files/assets/public/v/1/council/meetings/council-meetings/oc_28112022_min.pdf",
+        "title": "Nsw",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S71",
+        "url": "https://rocketreach.co/upper-hunter-shire-council-management_b5ea5694f42e7940",
+        "title": "Upper Hunter Shire Council Management Team",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S72",
+        "url": "https://www.signalhire.com/companies/upper-hunter-shire-council/employees",
+        "title": "List of 35 Upper Hunter Shire Council Employees - Find Emails & Phones - SignalHire",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S73",
+        "url": "https://www.careersatcouncil.com.au/job/general-labourer-water-sewer/",
+        "title": "General Labourer",
+        "pageAge": "117 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S74",
+        "url": "https://www.upperhunter.nsw.gov.au/files/assets/public/v/1/council/meetings/committee-meetings/is/isc_10102023_agn_at.pdf",
+        "title": "A Quality Rural Lifestyle - in a vibrant, caring and sustainable community",
+        "pageAge": "1091 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S75",
+        "url": "https://au.jora.com/Upper-Hunter-Shire-Council-jobs-in-The-Common-NSW",
+        "title": "9 Upper Hunter Shire Council jobs in The Common NSW",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S76",
+        "url": "https://www.upperhunter.nsw.gov.au/files/assets/public/v/2/news/upper-hunter-shire-council-projects-for-funding-consideration-january-2023.pdf",
+        "title": "General Manager",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S77",
+        "url": "https://www.publicnow.com/view/5ED05400A8E9FBDFFBAE10FF4CCFE277E32BB322",
+        "title": "Upper Hunter Shire Council (via Public) / Works Schedule - Week Starting Monday, 28 October 2024",
+        "pageAge": "710 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S78",
+        "url": "https://www.huntercircular.com.au/directory/upper-hunter-shire-council/",
+        "title": "Upper Hunter Shire Council - Hunter Circular",
+        "pageAge": "270 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S79",
+        "url": "https://www.upperhunter.nsw.gov.au/files/assets/public/v/1/public-notices/uhsc_dpop_2025-26_draft.pdf",
+        "title": "uhsc dpop 2025 26 draft",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S80",
+        "url": "https://www.981powerfm.com.au/local-news/upper-hunter-council-pushes-for-restoration-of-scone-maternity-services/",
+        "title": "Upper Hunter Council pushes for restoration of Scone maternity services - 98.1 Power FM",
+        "pageAge": "33 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S81",
+        "url": "https://www.australiantenders.com.au/tenders/421028/telemetry-and-scada-upgrade-works-goods/",
+        "title": "Tender",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S82",
+        "url": "https://www.upperhunter.nsw.gov.au/files/assets/public/council/meetings/committee-meetings/is/isc_09052023_agn_at.pdf",
+        "title": "isc 09052023 agn at",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S83",
+        "url": "https://www.upperhunter.nsw.gov.au/News/Monthly-Works-Schedule-Month-Starting-Monday-20-July-2026",
+        "title": "Monthly Works Schedule - Month Starting Monday, 20 July 2026 - UHSC",
+        "pageAge": "79 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S84",
+        "url": "https://www.australiantenders.com.au/tenders/202602/upper-hunter-water-utilities-alliance/",
+        "title": "Tender",
+        "pageAge": null,
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      },
+      {
+        "key": "S85",
+        "url": "https://utilitymagazine.com.au/upgraded-telemetry-network-for-warrumbungle-water/",
+        "title": "Upgraded telemetry network for Warrumbungle water - Utility Magazine",
+        "pageAge": "1328 days ago",
+        "seenInSearch": true,
+        "fetched": false,
+        "fetchKind": null,
+        "retrievedAt": null,
+        "fetchError": null,
+        "citedCount": 0,
+        "citedExcerpts": []
+      }
+    ],
+    "followupRounds": 1,
+    "stages": [
+      {
+        "stage": "discover",
+        "round": 1,
+        "model": "claude-sonnet-5-5",
+        "retriever": "anthropic-web-tools",
+        "usage": {
+          "model": "claude-sonnet-5-5",
+          "apiRequests": 1,
+          "inputTokens": 201,
+          "outputTokens": 5073,
+          "cacheWriteTokens": 121502,
+          "cacheReadTokens": 120267,
+          "searchRequests": 7,
+          "fetchRequests": 1
+        },
+        "cost": {
+          "isEstimate": true,
+          "pricesCheckedOn": "2026-10-03",
+          "inputUsd": 0.000402,
+          "outputUsd": 0.050730000000000004,
+          "cacheWriteUsd": 0.303755,
+          "cacheReadUsd": 0.024053400000000003,
+          "searchUsd": 0.07,
+          "totalUsd": 0.4489404
+        },
+        "durationMs": 113554,
+        "stopReasons": [
+          "end_turn"
+        ],
+        "continuations": 0,
+        "rulesFiles": [
+          {
+            "name": "01_RESEARCH_RULES.md",
+            "chars": 11531
+          },
+          {
+            "name": "02_TELTONIKA_RELEVANCE.md",
+            "chars": 4324
+          }
+        ],
+        "systemPromptChars": 22134,
+        "userMessageChars": 339,
+        "effort": "medium",
+        "caps": {
+          "maxSearches": 8,
+          "maxFetches": 5,
+          "maxContinuations": 5,
+          "maxTokens": 16000
+        },
+        "ledger": {
+          "textBlocks": 2,
+          "thinkingBlocks": 2,
+          "serverToolUseBlocks": 14,
+          "searchResultBlocks": 7,
+          "searchResultsReturned": 69,
+          "searchQueries": [
+            "Upper Hunter Shire Council Delivery Program Operational Plan 2026-27 capital works",
+            "Upper Hunter Shire Council 4G network CCTV Wi-Fi IoT",
+            "Upper Hunter Shire Council council meeting agenda 2026 water treatment plant communications",
+            "Upper Hunter Shire Council SCADA telemetry water sewer upgrade",
+            "Upper Hunter Shire Council Infrastructure Services Committee 2026 water sewer capital works report",
+            "Upper Hunter Shire Council ABN 84 0 trading legal entity Scone",
+            "Upper Hunter Shire Council SCADA telemetry Merriwa Cassilis Murrurundi water 2025"
+          ],
+          "searchErrors": [],
+          "fetchResultBlocks": 1,
+          "fetchedOk": 1,
+          "fetchRequestedUrls": [
+            "https://www.upperhunter.nsw.gov.au/files/sharedassets/public/v/1/council-meetings/agendas/isc_09122025_agn_at.pdf"
+          ],
+          "fetchErrors": [],
+          "citationsTotal": 0,
+          "citationsMapped": 0,
+          "citationsUnmapped": 0,
+          "citedUrlNotInResults": 0,
+          "resultsViaCodeExecution": 8,
+          "otherBlockTypes": {
+            "code_execution_tool_result": 6
+          }
+        },
+        "answerPreview": "Let me print key contents.\nENTITY_MATCH: Confirmed - Upper Hunter Shire Council is an NSW local government authority. Its own contact page gives ABN 17 261 839 740 and 135 Liverpool Street, Scone, and no other organisation matches the name.\nENTITY_NAME: Upper Hunter Shire Council\nOFFICIAL_WEBSITE: https://www.upperhunter.nsw.gov.au\nTRADING_LEGAL: not applicable - the council trades under its own legal name (abbreviated \"UHSC\" on its website); High confidence\nINDUSTRY: Smart City - a regional NSW council that runs water, sewer, roads and community infrastructure (Energy & Utilities is a secondary fit because of its water and sewer assets)\nCLIENT_TYPE: End User - the council operates its own water, sewer and IT networks. Its WAN and firewall work is outsourced to Atturra.\nSUMMARY: Upper Hunter Shire Council is the local government authority for the Scone, Aberdeen, Merriwa, Cassilis and Murrurundi area of NSW. It operates five water supply schemes and sewerage systems, with offices in Scone, Merriwa and Murrurundi. It has a small in-house IT team supported by Atturra for networking and infrastructure.\nCONTEXT_CHECK: none supplied\nRELEVANCE | moderate | Distributed water and sewer assets with telemetry and SCADA upgrades, and about 40 council sites on a WAN with 4G failover in places. No current, specific connectivity project was confirmed in this run.\nCARD | company_profile | unknown | The council's contact page gives its ABN as 17-261-839-740 and its address as 135 Liverpool Street, Scone NSW 2337. @@ https://upperhunter.nsw.gov.au/contact.aspx @@ ABN: 17-261-839-740 Address: 135 Liverpool Street Scone NSW 2337\nCARD | infrastructure | unknown | Council operates five water supply schemes serving Scone, Aberdeen, Merriwa, Cassilis and Murrurundi. A water treatment plant and Aberdeen back feed are described as proposed for the future. @@ https://www.upperhunter.nsw.gov.au/Residents/Water-and-Sewage/Water @@ operates five water supply schemes for servicing the townships of Scone, Aberdeen, Merriwa, Cassilis and Murrurundi\nCARD | infrastructure | 2020 | In 2020 the council completed a $14 million pipeline and pumping stations to move potable water from Scone to Murrurundi. @@ https://www.upperhunter.nsw.gov.au/Residents/Water-and-Sewage/Water @@ through a $14 million pipeline and pumping stations to transfer potable water from Scone to Murrurundi\nCARD | technology | 2022-06 | The June 2022 Infrastructure Services Committee agenda lists a water and sewer SCADA/Telemetry upgrade at all sites in Merriwa and Cassilis, shown as 98% complete with final set-up work remaining. The listed budget was $71,000 against $83,129. @@ https://www.upperhunter.nsw.gov.au/files/assets/public/v/1/council/meetings/committee-meetings/is/infrastructure-services-committee-meeting-agenda-14-june-2022.pdf @@ Upgrade of telemetry at all\nCARD | vendor_partner | unknown | Atturra's client story says the council's in-house Information Services team uses Atturra for networking and infrastructure projects. Atturra helped manage and troubleshoot 40-plus sites, internet access across the WAN, firewalling, and a refresh of core and edge switches. @@ https://atturra.com/au-en/client-stories/upper-hunter-shire-council-it-partnership/ @@ Assisted with management and troubleshooting of 40 plus sites.\nCARD | technology | unknown | After security breaches the council split its IT systems across two supplier WANs, with some sites also using 4G for failover where appropriate. @@ https://atturra.com/au-en/client-stories/upper-hunter-shire-council-it-partnership/ @@ with some sites also utilising 4G for failover where appropriate\nCARD | governance_doc | 2026-06-29 | At its 29 June 2026 meeting, council adopted the Delivery Program 2026 to 2029 and Operational Plan 2026 to 2027. These include the annual budget and capital works program. @@ https://www.upperhunter.nsw.gov.au/News/Council-Meeting-Recap-June-2026 @@ adopted the Delivery Program 2026 to 2029 and Operational Plan 2026 to 2027 following public exhibition\nCARD | governance_doc | 2026-04 | The draft 2026–27 Delivery Program and Operational Plan was on public exhibition from 30 April to 29 May 2026. The PDF is 41MB. @@ https://www.upperhunter.nsw.gov.au/Public-notices/Delivery-Program-and-Operational-Plan-2026-27 @@ placed its Draft Delivery Program and Operational Plan (DPOP) for 2026–2027 on public exhibition from 11:00am, Thursday 30 April 2026\nCARD | contract_tender | unknown | The contractor Abergeldie delivers an annual sewer relining package for the council, renewing up to 4km of sewer pipeline a year. The work includes CCTV inspections. This is civil work with no connectivity content. @@ https://abergeldie.com/projects/upper-hunter-shire-council-sewer-relining-program @@ renews up to 4km of sewer pipelines annually in Upper Hunter using trenchless methods to improve network serviceability\nLEAD | high | Do the adopted 2026–27 Operational Plan or capital works program include SCADA, telemetry, w",
+        "warnings": [
+          "The API attached no citations to this answer (normal with dynamic filtering). Evidence is graded by how it could be tied to a source: see the badges.",
+          "Evidence accepted: 0 API-cited, 0 quote-verified, 9 tool-source (cards + people).",
+          "1 line(s) of the answer were not in the tagged format and were ignored."
+        ],
+        "startedAt": "2026-10-05T04:34:22.717Z"
+      },
+      {
+        "stage": "followup",
+        "round": 1,
+        "model": "claude-sonnet-5-5",
+        "retriever": "anthropic-web-tools",
+        "usage": {
+          "model": "claude-sonnet-5-5",
+          "apiRequests": 1,
+          "inputTokens": 6145,
+          "outputTokens": 6382,
+          "cacheWriteTokens": 134907,
+          "cacheReadTokens": 509057,
+          "searchRequests": 6,
+          "fetchRequests": 3
+        },
+        "cost": {
+          "isEstimate": true,
+          "pricesCheckedOn": "2026-10-03",
+          "inputUsd": 0.01229,
+          "outputUsd": 0.06382,
+          "cacheWriteUsd": 0.3372675,
+          "cacheReadUsd": 0.1018114,
+          "searchUsd": 0.06,
+          "totalUsd": 0.5751889000000001
+        },
+        "durationMs": 287525,
+        "stopReasons": [
+          "end_turn"
+        ],
+        "continuations": 0,
+        "rulesFiles": [
+          {
+            "name": "01_RESEARCH_RULES.md",
+            "chars": 11531
+          },
+          {
+            "name": "02_TELTONIKA_RELEVANCE.md",
+            "chars": 4324
+          }
+        ],
+        "systemPromptChars": 22625,
+        "userMessageChars": 15241,
+        "effort": "medium",
+        "caps": {
+          "maxSearches": 6,
+          "maxFetches": 4,
+          "maxContinuations": 5,
+          "maxTokens": 12000
+        },
+        "ledger": {
+          "textBlocks": 1,
+          "thinkingBlocks": 5,
+          "serverToolUseBlocks": 17,
+          "searchResultBlocks": 6,
+          "searchResultsReturned": 58,
+          "searchQueries": [
+            "Upper Hunter Shire Council Infrastructure Services Committee agenda water sewer SCADA telemetry 2026",
+            "Upper Hunter Shire Council Director Infrastructure Services",
+            "Upper Hunter Shire Council Manager Water and Sewer",
+            "Upper Hunter Shire Council Operational Plan 2026-27 capital works water treatment plant sewage treatment plant Scone",
+            "Upper Hunter Shire Council SCADA telemetry radio water sewer upgrade Scone Aberdeen",
+            "Upper Hunter Shire Council Infrastructure Services Committee water sewer works program telemetry 2026"
+          ],
+          "searchErrors": [],
+          "fetchResultBlocks": 3,
+          "fetchedOk": 3,
+          "fetchRequestedUrls": [
+            "https://www.upperhunter.nsw.gov.au/files/assets/public/v/2/council/meetings/council-meetings/oc_28092026_agn_at-v4.pdf",
+            "https://www.upperhunter.nsw.gov.au/Residents/Water-and-Sewage/Water/Boil-Water-Alert",
+            "https://www.upperhunter.nsw.gov.au/files/sharedassets/public/v/1/council-meetings/agendas/isc_09122025_agn_at.pdf"
+          ],
+          "fetchErrors": [],
+          "citationsTotal": 0,
+          "citationsMapped": 0,
+          "citationsUnmapped": 0,
+          "citedUrlNotInResults": 0,
+          "resultsViaCodeExecution": 9,
+          "otherBlockTypes": {
+            "code_execution_tool_result": 8
+          }
+        },
+        "answerPreview": "LEAD_RESULT | L1 | unresolved | The adopted 2026–27 DPOP and the 9 December 2025 Infrastructure Services agenda only came back as encoded PDF data, so I could not confirm whether SCADA, telemetry or comms are specified. The water treatment plant (about $80M) and the sewage treatment plant replacement (about $50M) are described as unfunded and dependent on grants.\nLEAD_RESULT | L2 | unresolved | I found no current-status or comms detail (radio or cellular) for the Merriwa/Cassilis telemetry upgrade. The last web search was refused because the tool-use limit was exceeded.\nLEAD_RESULT | L3 | unresolved | Stephen Hitchens is named as Director Infrastructure Services in the 28 September 2026 meeting agenda. The current Manager Water & Sewer was not found; Grahame Wilson held the role in October 2023 and Greg Longman in March 2022.\nCARD | governance_doc | 2026-09-28 | The 28 September 2026 Ordinary Meeting agenda reports on the Infrastructure Services Committee meeting of 8 September 2026. It names Stephen Hitchens as Director Infrastructure Services and the responsible officer, with Emma Howard (Infrastructure Services Support Officer) as report preparer. @@ https://www.upperhunter.nsw.gov.au/files/assets/public/v/2/council/meetings/council-meetings/oc_28092026_agn_at-v4.pdf @@ Stephen Hitchens - Director Infrastructure Services\nCARD | project | 2025 | Council's water supply web page says the joint Scone/Muswellbrook water treatment facility would cost about $80 million for the water plant and a further $50 million to replace the ageing sewage treatment plant. Council says these projects are not affordable without significant external grant funding. @@ https://www.upperhunter.nsw.gov.au/Residents/Water-and-Sewage/Water/Boil-Water-Alert @@ it would cost around $80 million for the water plant and a further $50 million to replace the ageing sewage treatment plant\nCARD | infrastructure | 2025 | Council supplies Scone, Aberdeen and Murrurundi directly from Glenbawn Dam. The only treatment is chlorination, with UV disinfection coming soon, and there is no filtration plant. Since 2023 it has worked with Muswellbrook Shire Council on a joint water treatment facility. @@ https://www.upperhunter.nsw.gov.au/Residents/Water-and-Sewage/Water/Boil-Water-Alert @@ Since 2023, UHSC and MSC have been working together on the idea of a joint water treatment facility.\nCARD | news | 2025 | Council's funding letter says the Scone, Aberdeen and Murrurundi supply had two extended boil water alerts in 2025. The first lasted five weeks from June, and the second began on 6 August and was expected to run up to eight weeks. It puts the estimated capital cost for Upper Hunter Shire alone at $78–$80 million. @@ https://www.upperhunter.nsw.gov.au/Residents/Water-and-Sewage/Water/Boil-Water-Alert @@ The estimated capital cost for UHSC is $78–$80 million.\nCARD | project | 2023-10 | The October 2023 Infrastructure Services Committee agenda lists Scone Water Treatment Plant (joint with Muswellbrook Shire Council) under Water & Sewer capital works. It says BECA had done a preliminary feasibility review of the Brushy Hill site. @@ https://www.upperhunter.nsw.gov.au/files/assets/public/v/1/council/meetings/committee-meetings/is/isc_10102023_agn_at.pdf @@ BECA has undertaken a preliminary feasibility review of the Brushy Hill site\nCARD | project | 2023-04 | The April 2023 Infrastructure Services Committee agenda says the Scone Sewerage Treatment Plant is proposed to be replaced or upgraded, depending on funding and technical capability. @@ https://www.upperhunter.nsw.gov.au/files/assets/public/council/meetings/committee-meetings/is/isc_11042023_agn_at.pdf @@ The Scone Sewerage Treatment Plant is proposed to be replaced or upgraded depending on funding and/or technical capability of the existing plant.\nPERSON | Stephen Hitchens | Director Infrastructure Services (named as responsible officer in September 2026) | Upper Hunter Shire Council | Responsible officer for Infrastructure Services Committee reports, which cover the water and sewer works program. @@ https://www.upperhunter.nsw.gov.au/files/assets/public/v/2/council/meetings/council-meetings/oc_28092026_agn_at-v4.pdf @@ Stephen Hitchens - Director Infrastructure Services\nPERSON | Grahame Wilson | Manager Water & Sewer | Upper Hunter Shire Council | Named author of the October 2023 Water & Sewer works program report, which covers the water treatment plant feasibility. @@ https://www.upperhunter.nsw.gov.au/files/assets/public/v/1/council/meetings/committee-meetings/is/isc_10102023_agn_at.pdf @@ Grahame Wilson - Manager Water & Sewer\nLEAD | high | Does the 8 September 2026 Infrastructure Services Committee report, or the adopted 2026–27 DPOP capital program, include telemetry, SCADA or comms items for water and sewer sites? | This would show whether a connectivity upgrade is budgeted. The PDFs were returned as encoded data and could not be read here.\n",
+        "warnings": [
+          "The API attached no citations to this answer (normal with dynamic filtering). Evidence is graded by how it could be tied to a source: see the badges.",
+          "Evidence accepted: 0 API-cited, 3 quote-verified, 5 tool-source (cards + people)."
+        ],
+        "startedAt": "2026-10-05T04:36:17.588Z"
+      }
+    ]
+  },
+  "next": {
+    "action": "synthesize",
+    "reason": "The maximum number of follow-up rounds has been used."
+  },
+  "gateLog": [
+    {
+      "afterStage": "discover",
+      "action": "followup",
+      "reason": "4 open lead(s) worth checking; following the top 3.",
+      "at": "2026-10-05T04:34:20.900Z"
+    },
+    {
+      "afterStage": "followup 1",
+      "action": "synthesize",
+      "reason": "The maximum number of follow-up rounds has been used.",
+      "at": "2026-10-05T04:36:15.757Z"
+    }
+  ],
+  "synthesis": {
+    "relevance": "moderate",
+    "summary": "Upper Hunter Shire Council is a regional NSW council (Smart City, with Energy & Utilities as a secondary fit). It is an End User running five water supply schemes, sewerage systems and an IT network of 40-plus sites. Its WAN and firewall work is supported by Atturra. The evidence shows a Teltonika-relevant footprint: distributed water and sewer assets, a 2022 SCADA/telemetry upgrade in Merriwa and Cassilis, and 4G failover at some sites. However, no current, confirmed connectivity or telemetry project was found. The strongest live development is the council's water-quality program, supported by quote_verified cards. It covers UV disinfection 'coming soon', a joint Scone/Muswellbrook water treatment facility (about $80M) under work since 2023, and a sewage treatment plant replacement (about $50M). It follows two extended boil water alerts in 2025. The large plants are unfunded and depend on grants, and no comms component is confirmed. The adopted 2026–29 Delivery Program and the September 2026 committee papers could not be read, so it is unknown whether telemetry or comms items are budgeted. Overall this is a medium-strength account: credible reasons to talk exist, but there is no strong recent Sales Trigger.",
+    "noMeaningfulAngleNote": "",
+    "triggers": [
+      {
+        "id": "T1",
+        "rank": "primary",
+        "kind": "sales_trigger",
+        "priority": "medium",
+        "title": "Water treatment upgrade program: UV disinfection, joint water treatment facility and sewage treatment plant replacement",
+        "recency": "over_12_months",
+        "scale": "Supplies Scone, Aberdeen and Murrurundi. Estimated $78–80M capital cost for UHSC alone, about $80M for the joint water plant plus about $50M for sewage treatment plant replacement. Projects are unfunded and depend on grants.",
+        "fact": "Council supplies Scone, Aberdeen and Murrurundi directly from Glenbawn Dam with chlorination only. It says UV disinfection is coming soon and there is no filtration plant. Since 2023 it has worked with Muswellbrook Shire Council on a joint water treatment facility (E12). The facility would cost about $80M for the water plant and a further $50M to replace the ageing sewage treatment plant. Council says these projects are not affordable without significant external grant funding (E11). The supply had two extended boil water alerts in 2025, and the estimated capital cost for Upper Hunter Shire alone is $78–80M (E13). The October 2023 committee agenda lists the joint Scone Water Treatment Plant under Water & Sewer capital works, with a BECA preliminary feasibility review of the Brushy Hill site (E14). The April 2023 agenda says the Scone Sewerage Treatment Plant is proposed to be replaced or upgraded, depending on funding (E15).",
+        "factCardIds": [
+          "E11",
+          "E12",
+          "E13",
+          "E14",
+          "E15"
+        ],
+        "evidenceGrade": "tool_source",
+        "inference": "New treatment equipment such as UV disinfection, and any future treatment plant, would typically need monitoring and control. That may have to integrate with the council's existing water and sewer telemetry. None of the cards mention connectivity, telemetry or comms for these projects. The large plants are unfunded, so timing is uncertain. The UV disinfection item is the most near-term element, but its current status is unconfirmed. The core cards are quote_verified, but they date from 2025, so the information is over 12 months old.",
+        "possibleOpportunity": "Worth exploring how monitoring and communications are being planned for the UV disinfection work and any future treatment assets, and whether these will tie into existing telemetry.",
+        "whyNow": "Water quality is clearly a live, high-profile issue for the council after the 2025 boil water alerts. The UV disinfection was described as 'coming soon', and the adopted 2026–27 Operational Plan (E7) may carry related capital works. The evidence is over 12 months old, so current status should be confirmed in conversation."
+      },
+      {
+        "id": "T2",
+        "rank": "secondary",
+        "kind": "sales_trigger",
+        "priority": "medium",
+        "title": "Existing 4G failover across a 40-plus-site council WAN",
+        "recency": "unknown",
+        "scale": "40-plus sites across the WAN, with two supplier WANs and 4G failover at some sites",
+        "fact": "Atturra's client story says the council's in-house Information Services team uses Atturra for networking and infrastructure projects. Atturra helped manage and troubleshoot 40-plus sites, internet access across the WAN, firewalling, and a refresh of core and edge switches (E5). After security breaches, the council split its IT systems across two supplier WANs, with some sites also using 4G for failover where appropriate (E6).",
+        "factCardIds": [
+          "E5",
+          "E6"
+        ],
+        "evidenceGrade": "tool_source",
+        "inference": "Existing use of cellular failover across a distributed site network is a direct Teltonika-relevant signal. Hardware, how current the setup is, and whether more sites will get failover are all unknown. The Atturra page is undated (about 894 days old by page age) and rests only on tool_source evidence. Atturra may influence hardware choices.",
+        "possibleOpportunity": "Worth understanding how 4G failover is currently handled across the council's sites, and whether coverage or reliability at remote sites is a concern.",
+        "whyNow": "There is no specific timing event. This is relevant account intelligence that makes a connectivity conversation credible, but the evidence is undated tool_source material, so its currency should be checked."
+      },
+      {
+        "id": "T3",
+        "rank": "secondary",
+        "kind": "sales_trigger",
+        "priority": "low",
+        "title": "Historical SCADA/telemetry upgrade at Merriwa and Cassilis water and sewer sites",
+        "recency": "over_12_months",
+        "scale": "All water and sewer sites in Merriwa and Cassilis; budget $71,000 against $83,129",
+        "fact": "The June 2022 Infrastructure Services Committee agenda lists a water and sewer SCADA/Telemetry upgrade at all sites in Merriwa and Cassilis. It is shown as 98% complete with final set-up work remaining, with a listed budget of $71,000 against $83,129 (E4).",
+        "factCardIds": [
+          "E4"
+        ],
+        "evidenceGrade": "tool_source",
+        "inference": "This confirms the council runs SCADA/telemetry across distributed water and sewer sites. It is historical background rather than a current trigger. The comms method (radio or cellular) is unknown. Evidence is tool_source only.",
+        "possibleOpportunity": "Could be worth asking how the telemetry network communicates today and whether the other schemes (Scone, Aberdeen, Murrurundi) have been or will be upgraded similarly.",
+        "whyNow": "No current timing. This is useful context that supports a telemetry-focused question alongside T1."
+      },
+      {
+        "id": "T4",
+        "rank": "hook",
+        "kind": "conversation_hook",
+        "priority": "low",
+        "title": "Adopted Delivery Program 2026–2029 and Operational Plan 2026–27, and the September 2026 Infrastructure Services report",
+        "recency": "3_to_6_months",
+        "scale": "Annual budget and capital works program, contents unknown",
+        "fact": "At its 29 June 2026 meeting, council adopted the Delivery Program 2026 to 2029 and Operational Plan 2026 to 2027, including the annual budget and capital works program (E7). The draft was on public exhibition from 30 April to 29 May 2026 (E8). The 28 September 2026 Ordinary Meeting agenda reports on the 8 September 2026 Infrastructure Services Committee meeting and names Stephen Hitchens as Director Infrastructure Services and responsible officer (E10).",
+        "factCardIds": [
+          "E7",
+          "E8",
+          "E10"
+        ],
+        "evidenceGrade": "tool_source",
+        "inference": "These are recent and genuine, and the new capital works program could contain telemetry or water infrastructure items. Its contents could not be read, so no Teltonika relevance is confirmed. Evidence is tool_source only.",
+        "possibleOpportunity": "A natural opener to ask which water and sewer infrastructure priorities are in the new capital works program.",
+        "whyNow": "Adopted about three months ago, with the first-year capital program now starting delivery."
+      }
+    ],
+    "people": [
+      {
+        "personId": "P1",
+        "rank": 1,
+        "whyRelevant": "Director Infrastructure Services and named responsible officer in the September 2026 agenda (E10). His committee covers the water and sewer works program behind T1, T3 and T4, which makes him the best confirmed current contact."
+      },
+      {
+        "personId": "P2",
+        "rank": 2,
+        "whyRelevant": "Authored the October 2023 Water & Sewer works program report covering the water treatment plant feasibility (E14). He would be highly relevant to telemetry questions, but it is unconfirmed whether he is still Manager Water & Sewer."
+      }
+    ],
+    "angles": [
+      {
+        "id": "A1",
+        "title": "Monitoring and communications for the water treatment upgrades",
+        "strength": "medium",
+        "triggerIds": [
+          "T1",
+          "T3"
+        ],
+        "cardIds": [
+          "E11",
+          "E12",
+          "E13",
+          "E14",
+          "E4"
+        ],
+        "evidenceGrade": "tool_source",
+        "conversationQuestion": "As the UV disinfection and treatment upgrades for Scone progress, how are you planning to monitor the new equipment and connect it back to your existing telemetry?",
+        "whyItWorks": "It refers to the council's most visible, quote_verified water-quality priority and asks about a likely telemetry need without assuming one exists.",
+        "recommended": true
+      },
+      {
+        "id": "A2",
+        "title": "4G failover across the council's site network",
+        "strength": "medium",
+        "triggerIds": [
+          "T2"
+        ],
+        "cardIds": [
+          "E5",
+          "E6"
+        ],
+        "evidenceGrade": "tool_source",
+        "conversationQuestion": "How is 4G failover working across your sites today, and are there remote sites where connectivity is still a headache?",
+        "whyItWorks": "Existing cellular failover across 40-plus sites is a direct connectivity signal, though the source is undated and Atturra may be involved.",
+        "recommended": false
+      },
+      {
+        "id": "A3",
+        "title": "Telemetry comms across the water and sewer schemes",
+        "strength": "weak",
+        "triggerIds": [
+          "T3"
+        ],
+        "cardIds": [
+          "E4",
+          "E2"
+        ],
+        "evidenceGrade": "tool_source",
+        "conversationQuestion": "What do your water and sewer telemetry sites use for communications today, radio or cellular?",
+        "whyItWorks": "It builds on the known Merriwa/Cassilis SCADA upgrade to learn the current comms setup across all five schemes.",
+        "recommended": false
+      },
+      {
+        "id": "A4",
+        "title": "New capital works program",
+        "strength": "weak",
+        "triggerIds": [
+          "T4"
+        ],
+        "cardIds": [
+          "E7",
+          "E10"
+        ],
+        "evidenceGrade": "tool_source",
+        "conversationQuestion": "Which water and sewer infrastructure projects are top priority in the newly adopted 2026–27 capital works program?",
+        "whyItWorks": "It is a recent, genuine opener that helps find out whether connectivity-related works are budgeted.",
+        "recommended": false
+      }
+    ],
+    "gaps": [
+      "Contents of the adopted 2026–27 Operational Plan and capital works program: whether SCADA, telemetry, comms, the water treatment plant, the Aberdeen back-feed or the sewage treatment plant are budgeted (L1, L6). The PDFs could not be read.",
+      "What communications (radio or cellular) the water and sewer telemetry sites use, and the current status of the Merriwa/Cassilis upgrade (L2).",
+      "Current Manager Water & Sewer. Grahame Wilson (2023) and Greg Longman (2022) are the last names found (L3, L7).",
+      "Whether the Atturra relationship is current and what hardware the 4G failover sites use (L4).",
+      "Whether UV disinfection at Scone is under way and whether it includes new control or telemetry equipment (L8).",
+      "Any recent tenders covering communications, CCTV or SCADA (L5).",
+      "No IT or Information Services lead identified for the WAN/4G angle.",
+      "No vendor or partner pages, competitor technology or industry sources found (coverage not_found).",
+      "Funding status of the joint water treatment facility and sewage treatment plant replacement (grant-dependent)."
+    ],
+    "droppedReferences": []
+  },
+  "synthesisLog": {
+    "stage": "synthesize",
+    "round": 1,
+    "model": "claude-opus-5-5",
+    "retriever": null,
+    "usage": {
+      "model": "claude-opus-5-5",
+      "apiRequests": 1,
+      "inputTokens": 8206,
+      "outputTokens": 5121,
+      "cacheWriteTokens": 10384,
+      "cacheReadTokens": 0,
+      "searchRequests": 0,
+      "fetchRequests": 0
+    },
+    "cost": {
+      "isEstimate": true,
+      "pricesCheckedOn": "2026-10-03",
+      "inputUsd": 0.032824,
+      "outputUsd": 0.10242,
+      "cacheWriteUsd": 0.051919999999999994,
+      "cacheReadUsd": 0,
+      "searchUsd": 0,
+      "totalUsd": 0.187164
+    },
+    "durationMs": 50118,
+    "stopReasons": [
+      "end_turn"
+    ],
+    "continuations": 0,
+    "rulesFiles": [
+      {
+        "name": "01_RESEARCH_RULES.md",
+        "chars": 11531
+      },
+      {
+        "name": "02_TELTONIKA_RELEVANCE.md",
+        "chars": 4324
+      },
+      {
+        "name": "03_SALES_TRIGGERS.md",
+        "chars": 5495
+      }
+    ],
+    "systemPromptChars": 25626,
+    "userMessageChars": 20640,
+    "effort": "medium",
+    "caps": {
+      "maxTokens": 16000
+    },
+    "ledger": null,
+    "answerPreview": "",
+    "warnings": [],
+    "startedAt": "2026-10-05T04:41:06.340Z"
+  },
+  "selectedAngleId": "A1",
+  "contact": {
+    "source": "researched",
+    "personId": "P1",
+    "name": "Stephen Hitchens",
+    "role": "Director Infrastructure Services (named as responsible officer in September 2026)"
+  },
+  "relationship": {
+    "kind": "new",
+    "note": ""
+  },
+  "email": {
+    "subject": "Monitoring for the Scone UV disinfection upgrade",
+    "body": "Hi Stephen,\n\nI saw Council has UV disinfection coming for the Scone, Aberdeen and Murrurundi supply, on top of the existing chlorination.\n\nNot sure how you're planning to monitor the new equipment and connect it back to your existing telemetry, so I'm interested to understand whether that's something already sorted or still open.\n\nI also saw the SCADA/telemetry upgrade at the Merriwa and Cassilis sites in the 2022 committee agenda, so I'm curious whether Scone would follow a similar approach.\n\nI'm with Teltonika Networks and thought there could be some overlap on the cellular connectivity side.\n\nWould you be available for a quick chat in the next couple of weeks?\n\nCheers,",
+    "originalSubject": "Monitoring for the Scone UV disinfection upgrade",
+    "originalBody": "Hi Stephen,\n\nI saw Council has UV disinfection coming for the Scone, Aberdeen and Murrurundi supply, on top of the existing chlorination.\n\nNot sure how you're planning to monitor the new equipment and connect it back to your existing telemetry, so I'm interested to understand whether that's something already sorted or still open.\n\nI also saw the SCADA/telemetry upgrade at the Merriwa and Cassilis sites in the 2022 committee agenda, so I'm curious whether Scone would follow a similar approach.\n\nI'm with Teltonika Networks and thought there could be some overlap on the cellular connectivity side.\n\nWould you be available for a quick chat in the next couple of weeks?\n\nCheers,",
+    "usedCardIds": [
+      "E12",
+      "E4"
+    ],
+    "angleId": "A1",
+    "contact": {
+      "source": "researched",
+      "personId": "P1",
+      "name": "Stephen Hitchens",
+      "role": "Director Infrastructure Services (named as responsible officer in September 2026)"
+    },
+    "relationship": {
+      "kind": "new",
+      "note": ""
+    },
+    "generatedAt": "2026-10-05T04:43:52.643Z",
+    "generation": 1
+  },
+  "emailLogs": [
+    {
+      "stage": "email",
+      "round": 1,
+      "model": "claude-sonnet-5-5",
+      "retriever": null,
+      "usage": {
+        "model": "claude-sonnet-5-5",
+        "apiRequests": 1,
+        "inputTokens": 1089,
+        "outputTokens": 305,
+        "cacheWriteTokens": 6085,
+        "cacheReadTokens": 0,
+        "searchRequests": 0,
+        "fetchRequests": 0
+      },
+      "cost": {
+        "isEstimate": true,
+        "pricesCheckedOn": "2026-10-03",
+        "inputUsd": 0.002178,
+        "outputUsd": 0.0030499999999999998,
+        "cacheWriteUsd": 0.0152125,
+        "cacheReadUsd": 0,
+        "searchUsd": 0,
+        "totalUsd": 0.0204405
+      },
+      "durationMs": 4545,
+      "stopReasons": [
+        "end_turn"
+      ],
+      "continuations": 0,
+      "rulesFiles": [
+        {
+          "name": "04_OUTREACH_RULES.md",
+          "chars": 7552
+        },
+        {
+          "name": "05_OUTREACH_EXAMPLES.md",
+          "chars": 5475
+        }
+      ],
+      "systemPromptChars": 15944,
+      "userMessageChars": 3004,
+      "effort": "low",
+      "caps": {
+        "maxTokens": 4000
+      },
+      "ledger": null,
+      "answerPreview": "",
+      "warnings": [],
+      "startedAt": "2026-10-05T04:43:48.094Z"
+    }
+  ]
+}

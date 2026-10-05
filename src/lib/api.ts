@@ -5,7 +5,7 @@
 
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
-import { MissingApiKeyError } from "./anthropic";
+import { MissingApiKeyError, MockModeError } from "./anthropic";
 import { BadInputError } from "./stages/common";
 import type { ApiError } from "./types";
 
@@ -29,7 +29,7 @@ export async function handleStage(request: Request, run: (body: Record<string, u
     return Response.json({ ok: true, ...(result as object) });
   } catch (error) {
     if (error instanceof BadInputError) return fail(error.message, 400);
-    if (error instanceof MissingApiKeyError) return fail(error.message, 500);
+    if (error instanceof MissingApiKeyError || error instanceof MockModeError) return fail(error.message, 500);
     if (error instanceof Anthropic.AuthenticationError)
       return fail("Anthropic rejected the API key. Check ANTHROPIC_API_KEY.", 401);
     if (error instanceof Anthropic.RateLimitError)

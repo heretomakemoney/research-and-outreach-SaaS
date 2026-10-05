@@ -8,7 +8,7 @@
 import { handleStage } from "@/lib/api";
 import { GATE, STATE_LIMITS } from "@/lib/config";
 import { decideNext } from "@/lib/gate";
-import { runResearchStage } from "@/lib/stages/research";
+import { getRunners } from "@/lib/stages/runners";
 import { BadInputError } from "@/lib/stages/common";
 import { sanitizeState, totalCostUsd, totalSearches } from "@/lib/state";
 
@@ -28,6 +28,7 @@ export async function POST(request: Request) {
     if (next.action !== "followup") {
       throw new BadInputError(`No follow-up is justified for this research (${next.reason})`);
     }
-    return runResearchStage({ kind: "followup", state, focus: next.focus, leadIds: next.leadIds });
+    const runners = await getRunners();
+    return runners.research({ kind: "followup", state, focus: next.focus, leadIds: next.leadIds });
   });
 }

@@ -5,7 +5,7 @@
 
 import { handleStage } from "@/lib/api";
 import { STATE_LIMITS } from "@/lib/config";
-import { runEmailStage } from "@/lib/stages/email";
+import { getRunners } from "@/lib/stages/runners";
 import { BadInputError } from "@/lib/stages/common";
 import { sanitizeState } from "@/lib/state";
 import { validateSynthesis } from "@/lib/synthesis";
@@ -48,7 +48,8 @@ export async function POST(request: Request) {
       throw new BadInputError("The synthesis is missing or invalid. Run the synthesis first.");
     }
     const generation = typeof body.generation === "number" && body.generation >= 1 ? Math.min(50, Math.floor(body.generation)) : 1;
-    return runEmailStage({
+    const runners = await getRunners();
+    return runners.email({
       state,
       synthesis,
       angleId: text(body.angleId, 12),

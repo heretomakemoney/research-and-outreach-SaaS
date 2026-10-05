@@ -5,7 +5,7 @@
 
 import { handleStage } from "@/lib/api";
 import { STATE_LIMITS } from "@/lib/config";
-import { runSynthesizeStage } from "@/lib/stages/synthesize";
+import { getRunners } from "@/lib/stages/runners";
 import { BadInputError } from "@/lib/stages/common";
 import { sanitizeState } from "@/lib/state";
 
@@ -27,6 +27,7 @@ export async function POST(request: Request) {
     if (state.entity && (state.entity.match === "Ambiguous" || state.entity.match === "Not found")) {
       throw new BadInputError("The company has not been confirmed, so synthesis is not run.");
     }
-    return runSynthesizeStage(state);
+    const runners = await getRunners();
+    return runners.synthesize(state);
   });
 }

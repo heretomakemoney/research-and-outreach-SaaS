@@ -10,6 +10,7 @@
 
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
+import { aiMode } from "./mode";
 
 export class MissingApiKeyError extends Error {
   constructor() {
@@ -19,7 +20,15 @@ export class MissingApiKeyError extends Error {
   }
 }
 
+export class MockModeError extends Error {
+  constructor() {
+    super("AI_MODE is mock, so paid Anthropic calls are switched off. Set AI_MODE=live to make real calls.");
+  }
+}
+
 export function getClient(): Anthropic {
+  // Hard stop: in mock mode no client is ever created, even if a key is present.
+  if (aiMode() === "mock") throw new MockModeError();
   if (!process.env.ANTHROPIC_API_KEY) throw new MissingApiKeyError();
   return new Anthropic(); // reads ANTHROPIC_API_KEY from the environment
 }

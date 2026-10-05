@@ -3,7 +3,7 @@
 // The research result: company check, relevance, triggers, people, angles, gaps,
 // and the evidence behind all of it. Display only (the angle choice is passed up).
 
-import { CardView, SourceChips, SourceTable } from "@/components/Sources";
+import { CardView, GradeBadge, SourceChips, SourceTable } from "@/components/Sources";
 import type { EvidenceCard, Person, Workflow } from "@/lib/types";
 
 const RANK_LABEL = { primary: "PRIMARY TRIGGER", secondary: "Secondary trigger", hook: "Conversation hook" } as const;
@@ -135,7 +135,7 @@ export default function ResearchView({
                   {p.role}
                   {p.organisation ? `, ${p.organisation}` : ""}
                 </span>{" "}
-                <SourceChips keys={p.sourceKeys} />
+                <SourceChips keys={p.sourceKeys} /> <GradeBadge grade={p.grade} />
                 <div>{rp.whyRelevant || p.whyRelevant}</div>
                 {p.evidence.length > 0 && (
                   <details>

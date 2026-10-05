@@ -21,6 +21,29 @@ export const TOOL_VERSIONS = {
 const SONNET: ModelId = "claude-sonnet-5-5";
 const OPUS: ModelId = "claude-opus-5-5";
 
+/**
+ * HOW Claude reads web results. This decides whether the API can vouch for the facts.
+ *
+ *  "direct"    - Claude reads each search result / fetched page itself. The API then attaches
+ *                citations (with the exact excerpt) to the text Claude writes. This is what
+ *                traceable evidence needs.
+ *  "dynamic"   - "Dynamic filtering": Claude's own code filters the results first and Claude writes
+ *                its answer from that code's output (which comes back encrypted). Cheaper on tokens,
+ *                but the answer then carries NO citations, so no fact can be tied to a source.
+ *
+ * The first live run (Upper Hunter) used the default of these tool versions, "dynamic":
+ * 0 citations, so every card was rejected. Keep "direct" unless citations are not needed.
+ *
+ * Cost note: "direct" puts the full search results and fetched pages into the model's context.
+ * `fetchMaxContentTokens` bounds web PAGES but the API does NOT apply it to PDFs, so a long
+ * council-agenda PDF can be large. Watch the cost table on PDF-heavy councils.
+ */
+export const WEB_TOOLS = {
+  searchCaller: "direct" as "direct" | "dynamic",
+  fetchCaller: "direct" as "direct" | "dynamic",
+  fetchMaxContentTokens: 30000,
+};
+
 interface WebStageConfig {
   model: ModelId;
   effort: Effort;

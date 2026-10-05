@@ -48,6 +48,7 @@ export function fakeRetriever(blocks: unknown[], usages: Anthropic.Usage[] = [us
         retrieverId: "fake-retriever",
         rawAnswerText: ledger.rawAnswerText,
         segments: ledger.segments,
+        pageTexts: ledger.pageTexts,
         sources: ledger.sources,
         stats: ledger.stats,
         usages,
@@ -60,3 +61,34 @@ export function fakeRetriever(blocks: unknown[], usages: Anthropic.Usage[] = [us
   };
   return { retriever, requests };
 }
+
+/** A web_fetch call + result. `kind: "pdf"` returns base64 data (we cannot read its text). */
+export const fetchBlocks = (
+  id: string,
+  url: string,
+  data: string,
+  opts: { kind?: "text" | "pdf"; caller?: unknown; title?: string } = {},
+) => [
+  { type: "server_tool_use", id, name: "web_fetch", input: { url }, caller: opts.caller ?? { type: "direct" } },
+  {
+    type: "web_fetch_tool_result",
+    tool_use_id: id,
+    caller: opts.caller ?? { type: "direct" },
+    content: {
+      type: "web_fetch_result",
+      url,
+      retrieved_at: "2026-10-05T00:00:00Z",
+      content: {
+        type: "document",
+        title: opts.title ?? "Fetched page",
+        citations: { enabled: true },
+        source:
+          opts.kind === "pdf"
+            ? { type: "base64", media_type: "application/pdf", data }
+            : { type: "text", media_type: "text/plain", data },
+      },
+    },
+  },
+];
+
+export const viaCode = { type: "code_execution_20260120", tool_id: "srvtoolu_code1" };

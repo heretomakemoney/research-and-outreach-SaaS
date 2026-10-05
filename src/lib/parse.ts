@@ -11,7 +11,13 @@
 // [S#] markers and segment offsets built in ledger.ts). Claude never tells us
 // which source supports a claim; the API does.
 //
-// A CARD or PERSON line with no backing source is REJECTED, not kept.
+// A CARD or PERSON line must be tied to a real source in one of two ways, otherwise it is REJECTED:
+//   1. api_cited      - the API attached a citation to that text (best: the API vouches for it).
+//   2. quote_verified - the line names a page URL and a verbatim quote (` @@ url @@ quote`), the URL is
+//                       one the web tools really returned (it is in the ledger), AND the quote is found
+//                       word for word in the page text the API returned for that URL.
+// Claude's own URL is never trusted by itself: it only counts when our code can check it against
+// what Anthropic's tools returned.
 //
 // Pure functions, no server-only imports: unit-tested in parse.test.ts.
 
@@ -20,6 +26,7 @@ import type {
   CardKind,
   CoverageStatus,
   EntityMatch,
+  EvidenceGrade,
   LeadPriority,
   LeadStatus,
   RelevanceLevel,
@@ -31,12 +38,21 @@ export interface Evidence {
   excerpt: string;
 }
 
+/** What the parser may check a named source and quote against. Built from the ledger. */
+export interface EvidenceContext {
+  /** The ledger key (S#) for a URL the web tools returned, or null if no tool returned it. */
+  resolveSource(url: string): string | null;
+  /** The full page text the API returned for that source, or null (search snippet, PDF, not fetched). */
+  pageText(sourceKey: string): string | null;
+}
+
 export interface ParsedCard {
   kind: CardKind;
   date: string | null;
   claim: string;
   sourceKeys: string[];
   evidence: Evidence[];
+  grade: EvidenceGrade;
 }
 
 export interface ParsedPerson {
@@ -46,6 +62,7 @@ export interface ParsedPerson {
   whyRelevant: string;
   sourceKeys: string[];
   evidence: Evidence[];
+  grade: EvidenceGrade;
 }
 
 export interface ParsedLead {
@@ -105,9 +122,28 @@ function markerKeys(text: string): string[] {
   return keys;
 }
 
-/** Drop leading bullets / markdown emphasis so "- **CARD | ..." is still recognised. */
+/**
+ * Make a line easy to recognise: drop bullets, numbering, headings, bold, backticks and table borders,
+ * so "- **CARD | ..." , "1. `ENTITY_MATCH: ...`" and "| ENTITY_MATCH | Confirmed |" all work.
+ */
 function normaliseLine(line: string): string {
-  return line.replace(/^[\s>*\-•#]+/, "").replace(/\*\*/g, "").trim();
+  return line
+    .replace(/\*\*|__|`/g, "")
+    .replace(/^[\s>*\-\u2022#|]+/, "")
+    .replace(/^\d+[.)]\s+/, "")
+    .replace(/\s*\|\s*$/, "")
+    .trim();
+}
+
+/** Lower-case letters and digits only, single spaces: lets a quote match despite quotes, dashes and spacing. */
+export function normaliseForMatch(text: string): string {
+  return text.normalize("NFKC").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+}
+
+const MIN_QUOTE_CHARS = 20;
+
+function cleanUrl(raw: string): string {
+  return raw.trim().replace(/^[<(\[\s"']+/, "").replace(/[>)\],.;\s"']+$/, "");
 }
 
 function splitFields(rest: string, count: number): string[] {
@@ -236,11 +272,84 @@ const ENTITY_FIELDS: Record<string, keyof Omit<ParsedEntity, "match" | "matchNot
   CONTEXT_CHECK: "contextCheck",
 };
 
+// Other spellings Claude has used or might use for the identification lines.
+const KEY_ALIASES: Record<string, string> = {
+  COMPANY_MATCH: "ENTITY_MATCH",
+  COMPANY_NAME: "ENTITY_NAME",
+  OFFICIAL_SITE: "OFFICIAL_WEBSITE",
+  TRADING_NAME: "TRADING_LEGAL",
+  TRADING_NAME_LEGAL_ENTITY: "TRADING_LEGAL",
+  LEGAL_ENTITY: "TRADING_LEGAL",
+};
+
+/**
+ * Recognise an identification line in any of the shapes Claude tends to produce:
+ *   ENTITY_MATCH: Confirmed - reason      ENTITY_MATCH | Confirmed | reason
+ *   Entity match: Confirmed               ENTITY MATCH - Confirmed
+ * Returns the canonical key and the rest of the line, or null.
+ */
+function matchIdentificationLine(line: string): { key: string; value: string } | null {
+  const m = /^([A-Za-z][A-Za-z _/]{2,40}?)\s*(?::|\||=|\u2013|\u2014|\s-\s)\s*(.*)$/.exec(line);
+  if (!m) return null;
+  let key = m[1].trim().toUpperCase().replace(/[\s/]+/g, "_");
+  key = KEY_ALIASES[key] ?? key;
+  if (key !== "ENTITY_MATCH" && !(key in ENTITY_FIELDS)) return null;
+  return { key, value: m[2] };
+}
+
+/** Split " @@ url @@ quote" off the end of a CARD / PERSON line. */
+function splitSourceTail(rest: string): { main: string; url: string; quote: string } {
+  const parts = rest.split(/\s*@@\s*/);
+  return {
+    main: parts[0],
+    url: cleanUrl(stripMarkers(parts[1] ?? "")),
+    quote: stripMarkers(parts.slice(2).join(" ")).replace(/^["\u201c\u2018']+|["\u201d\u2019']+$/g, "").trim(),
+  };
+}
+
+type Tie =
+  | { ok: true; sourceKeys: string[]; evidence: Evidence[]; grade: EvidenceGrade }
+  | { ok: false; reason: string };
+
+/**
+ * Decide how (if at all) a CARD / PERSON line is tied to a real source.
+ * 1) API citations on the line's text. 2) A named ledger URL plus a quote found in the page text the API returned.
+ */
+function tieToSource(
+  lineText: string,
+  apiEvidence: Evidence[],
+  url: string,
+  quote: string,
+  ctx: EvidenceContext | undefined,
+): Tie {
+  const apiKeys = keysForLine(lineText, apiEvidence);
+  if (apiKeys.length > 0) return { ok: true, sourceKeys: apiKeys, evidence: pickEvidence(apiEvidence), grade: "api_cited" };
+
+  if (!ctx || !url || !quote) {
+    return { ok: false, reason: "no source: the API attached no citation and the line named no checkable source and quote" };
+  }
+  const key = ctx.resolveSource(url);
+  if (!key) return { ok: false, reason: `no source: the named URL was not returned by any search or fetch (${url.slice(0, 80)})` };
+  const text = ctx.pageText(key);
+  if (!text) {
+    return { ok: false, reason: `no source: ${key} was not read as page text (search snippet or PDF), so the quote cannot be checked and the API attached no citation` };
+  }
+  const wanted = normaliseForMatch(quote);
+  if (wanted.length < MIN_QUOTE_CHARS) return { ok: false, reason: `no source: the quote for ${key} is too short to check` };
+  if (!normaliseForMatch(text).includes(wanted)) return { ok: false, reason: `no source: the quote was not found in the text of ${key}` };
+  return { ok: true, sourceKeys: [key], evidence: [{ sourceKey: key, excerpt: quote.slice(0, 300) }], grade: "quote_verified" };
+}
+
 /**
  * @param raw the answer text WITH [S#] markers (rawAnswerText from the ledger, untrimmed)
  * @param segments segment offsets into `raw` (from the ledger)
+ * @param ctx lets the parser check a named source URL and quote against what the web tools returned
  */
-export function parseResearchOutput(raw: string, segments: AnswerSegment[]): ParsedResearch {
+export function parseResearchOutput(
+  raw: string,
+  segments: AnswerSegment[],
+  ctx?: EvidenceContext,
+): ParsedResearch {
   const result: ParsedResearch = {
     entity: null,
     cards: [],
@@ -275,27 +384,27 @@ export function parseResearchOutput(raw: string, segments: AnswerSegment[]): Par
 
     const line = normaliseLine(rawLine);
 
-    // ---- "KEY: value" identification lines
-    const kv = /^(ENTITY_MATCH|ENTITY_NAME|OFFICIAL_WEBSITE|TRADING_LEGAL|INDUSTRY|CLIENT_TYPE|SUMMARY|CONTEXT_CHECK)\s*:\s*(.*)$/i.exec(
-      line,
-    );
+    // ---- identification lines (ENTITY_MATCH: ..., ENTITY_MATCH | ..., Entity match - ...)
+    const kv = matchIdentificationLine(line);
     if (kv) {
-      const key = kv[1].toUpperCase();
       const evidence = evidenceForRange(segments, lineStart, lineEnd);
       for (const k of keysForLine(line, evidence)) if (!entity.sourceKeys.includes(k)) entity.sourceKeys.push(k);
-      const value = stripMarkers(kv[2]);
-      if (key === "ENTITY_MATCH") {
-        sawEntityMatch = true;
-        entity.match = normaliseMatch(value);
-        entity.matchNote = value;
-      } else {
-        entity[ENTITY_FIELDS[key]] = value;
+      const value = stripMarkers(kv.value);
+      // First occurrence wins, so a later stray line cannot overwrite the identification.
+      if (kv.key === "ENTITY_MATCH") {
+        if (!sawEntityMatch) {
+          sawEntityMatch = true;
+          entity.match = normaliseMatch(value);
+          entity.matchNote = value;
+        }
+      } else if (!entity[ENTITY_FIELDS[kv.key]]) {
+        entity[ENTITY_FIELDS[kv.key]] = value;
       }
       continue;
     }
 
     // ---- "TAG | field | field" lines
-    const tag = /^(CARD|PERSON|LEAD_RESULT|LEAD|COVERAGE|RELEVANCE)\s*\|\s*(.*)$/i.exec(line);
+    const tag = /^(CARD|PERSON|LEAD_RESULT|LEAD|COVERAGE|RELEVANCE)\s*[|:]\s*(.*)$/i.exec(line);
     if (!tag) {
       result.ignoredLines++;
       continue;
@@ -303,31 +412,36 @@ export function parseResearchOutput(raw: string, segments: AnswerSegment[]): Par
     const type = tag[1].toUpperCase();
     const rest = tag[2];
     const evidence = evidenceForRange(segments, lineStart, lineEnd);
-    const sourceKeys = keysForLine(line, evidence);
 
-    if (type === "CARD") {
-      const [kind, date, claim] = splitFields(rest, 3);
-      if (!claim) {
-        result.rejected.push({ line: line.slice(0, 200), reason: "card has no claim text" });
-      } else if (sourceKeys.length === 0) {
-        result.rejected.push({ line: line.slice(0, 200), reason: "card has no source (the API attached no citation)" });
+    if (type === "CARD" || type === "PERSON") {
+      const tail = splitSourceTail(rest);
+      if (type === "CARD") {
+        const [kind, date, claim] = splitFields(tail.main, 3);
+        const tie = tieToSource(line, evidence, tail.url, tail.quote, ctx);
+        if (!claim) {
+          result.rejected.push({ line: line.slice(0, 200), reason: "card has no claim text" });
+        } else if (!tie.ok) {
+          result.rejected.push({ line: line.slice(0, 200), reason: `card has ${tie.reason}` });
+        } else {
+          result.cards.push({
+            kind: normaliseKind(kind),
+            date: normaliseDate(date),
+            claim,
+            sourceKeys: tie.sourceKeys,
+            evidence: tie.evidence,
+            grade: tie.grade,
+          });
+        }
       } else {
-        result.cards.push({
-          kind: normaliseKind(kind),
-          date: normaliseDate(date),
-          claim,
-          sourceKeys,
-          evidence: pickEvidence(evidence),
-        });
-      }
-    } else if (type === "PERSON") {
-      const [name, role, organisation, whyRelevant] = splitFields(rest, 4);
-      if (!name) {
-        result.rejected.push({ line: line.slice(0, 200), reason: "person has no name" });
-      } else if (sourceKeys.length === 0) {
-        result.rejected.push({ line: line.slice(0, 200), reason: "person has no source (the API attached no citation)" });
-      } else {
-        result.people.push({ name, role, organisation, whyRelevant, sourceKeys, evidence: pickEvidence(evidence) });
+        const [name, role, organisation, whyRelevant] = splitFields(tail.main, 4);
+        const tie = tieToSource(line, evidence, tail.url, tail.quote, ctx);
+        if (!name) {
+          result.rejected.push({ line: line.slice(0, 200), reason: "person has no name" });
+        } else if (!tie.ok) {
+          result.rejected.push({ line: line.slice(0, 200), reason: `person has ${tie.reason}` });
+        } else {
+          result.people.push({ name, role, organisation, whyRelevant, sourceKeys: tie.sourceKeys, evidence: tie.evidence, grade: tie.grade });
+        }
       }
     } else if (type === "LEAD") {
       const [priority, question, why] = splitFields(rest, 3);

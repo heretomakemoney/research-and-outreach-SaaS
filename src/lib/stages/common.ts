@@ -23,6 +23,9 @@ export function ledgerWarnings(stats: LedgerStats): string[] {
   return warnings;
 }
 
+/** How much of the model's answer text is kept in the stage log for diagnosing parsing problems. */
+export const ANSWER_PREVIEW_CHARS = 5000;
+
 export interface LogInput {
   stage: StageName;
   round: number;
@@ -38,6 +41,7 @@ export interface LogInput {
   effort: string;
   caps: StageLog["caps"];
   ledger: LedgerStats | null;
+  answerPreview?: string;
   warnings: string[];
   startedAt: string;
 }
@@ -62,6 +66,7 @@ export function buildStageLog(i: LogInput): StageLog {
     effort: i.effort,
     caps: i.caps,
     ledger: i.ledger,
+    answerPreview: (i.answerPreview ?? "").slice(0, ANSWER_PREVIEW_CHARS),
     warnings: i.warnings,
     startedAt: i.startedAt,
   };

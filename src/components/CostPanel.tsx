@@ -120,6 +120,11 @@ export default function CostPanel({ wf }: { wf: Workflow }) {
             </dd>
             {l.ledger && (
               <>
+                <dt>Results read via code execution</dt>
+                <dd>
+                  {l.ledger.resultsViaCodeExecution}
+                  {l.ledger.resultsViaCodeExecution > 0 && " (dynamic filtering: no citations are returned in this mode)"}
+                </dd>
                 <dt>Search queries Claude ran</dt>
                 <dd>
                   {l.ledger.searchQueries.length === 0 ? (
@@ -162,6 +167,15 @@ export default function CostPanel({ wf }: { wf: Workflow }) {
               </>
             )}
           </dl>
+          {l.answerPreview && (
+            <details>
+              <summary>Raw answer text, as the app received it (first {num(l.answerPreview.length)} characters)</summary>
+              <pre className="raw">{l.answerPreview}</pre>
+              <p className="muted">
+                [S#] markers were added by our code from API citations. If a line has none, the API attached no citation to it.
+              </p>
+            </details>
+          )}
         </details>
       ))}
     </section>

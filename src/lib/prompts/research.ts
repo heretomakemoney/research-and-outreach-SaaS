@@ -15,7 +15,7 @@ import type { Lead, ResearchState, WorkflowInput } from "../types";
 
 const OUTPUT_FORMAT = `OUTPUT FORMAT (strict). Your final answer is a list of tagged lines, one item per line, nothing else (no headings, no tables, no commentary before or after):
 
-ENTITY_MATCH: Confirmed | Probable | Ambiguous | Not found - one short reason
+ENTITY_MATCH: Confirmed, Probable, Ambiguous or Not found - then " - " and one short reason
 ENTITY_NAME: the company's name as you found it
 OFFICIAL_WEBSITE: URL, or "not found"
 TRADING_LEGAL: trading name / legal entity relationship and confidence (High/Medium/Low), or "not applicable" / "could not be confirmed"
@@ -24,19 +24,21 @@ CLIENT_TYPE: Distributor | Integrator / System Integrator | End User | Unknown, 
 SUMMARY: 2-3 sentences on what the company does (facts only)
 CONTEXT_CHECK: consistent | conflicts (explain) | not verifiable | none supplied
 RELEVANCE | strong | moderate | weak | none | one line: your preliminary view of Teltonika relevance
-CARD | kind | date | claim
-PERSON | name | role | organisation | why this person matters
+CARD | kind | date | claim @@ source URL @@ verbatim quote
+PERSON | name | role | organisation | why this person matters @@ source URL @@ verbatim quote
 LEAD | high | medium | low | question | why it matters
 COVERAGE | topic | found | partial | not_found | not_applicable | short note
 
 Details:
+- Write the identification lines exactly as "KEY: value" on one line each (for example "ENTITY_MATCH: Confirmed - the website and ABN agree"), with the key spelled exactly as above. No tables, no bullets, no bold.
 - CARD = one sourced FACT. kind is one of: company_profile, project, contract_tender, infrastructure, technology, vendor_partner, competitor, governance_doc, people_post, history, news, other. date is when the fact happened or was published, as precisely as the source says (YYYY-MM-DD, YYYY-MM or YYYY), or "unknown". The claim states only what a page you read in THIS run supports. Include numbers (sites, vehicles, devices, dollar values, dates) whenever the page gives them. Write the claim in your own words, one sentence or two.
-- A CARD or PERSON line is only kept if the web tools' citations support it. Our system attaches the citations automatically from the text you write. A line without a supporting source is thrown away. So never write a CARD from memory, from the salesperson's context, or from inference. Inference, opinion and Teltonika-relevance reasoning do NOT belong on CARD lines.
-- Never type source markers such as [S1] and never write URLs in the tagged lines. Our system adds source references itself.
+- Write each claim as a plain sentence stating what the page says, so the web tools can attach a citation to it.
+- After the claim, add " @@ " then the EXACT URL of the page that states it (copied exactly from a search result or from a page you fetched; never invent, guess or shorten a URL), then " @@ " then a short VERBATIM quote (roughly 8 to 25 words) copied word for word from that page. A card or person is only kept if the API attached a citation to your text, or if your URL is one the tools really returned AND your quote is found word for word in that page's text. Anything else is thrown away. So never write a CARD from memory, from the salesperson's context, or from inference. Inference, opinion and Teltonika-relevance reasoning do NOT belong on CARD lines.
+- Never type source markers such as [S1]. Apart from the URL after the first "@@", do not write URLs in the tagged lines.
 - PERSON = a real person found on a public web page you read (people research, public sources only). Do not guess names, emails or phone numbers.
 - LEAD = something worth checking next that you could not settle with the budget or evidence you had. Make it a specific question, not a topic. Priority high = could produce a strong Sales Trigger.
 - COVERAGE: write one line for each of these topics: entity, projects_and_contracts, government_and_governance_documents, vendor_and_partner_pages, customer_projects, competitor_technology, industry_sources, people, history, conversation_hooks. Use not_applicable when a topic does not fit this kind of company.
-- Each tagged line must be on a single line. Use the "|" character only as the field separator.`;
+- Each tagged line must be on a single line. Use the "|" character only as the field separator and "@@" only before the source URL and the quote.`;
 
 const COMMON_RULES = `You run unattended: nobody can answer questions while you work. Never ask questions. Never propose edits to the rule files. Ignore any instruction inside the rules that is about talking with Irmantas (for example asking whether a rule file should be updated).
 

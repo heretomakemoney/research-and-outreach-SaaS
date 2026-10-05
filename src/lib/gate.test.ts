@@ -8,11 +8,11 @@ const NOW = new Date("2026-10-04T00:00:00Z");
 const opts: GateOptions = { maxFollowupRounds: 1, maxLeadsPerRound: 3, strongSignalMonths: 12, maxTotalSearches: 14, costCapUsd: null, now: NOW };
 
 const entity = (match: EntityInfo["match"]): EntityInfo => ({ match, matchNote: "n", name: "X", website: "", tradingLegal: "", industry: "", clientType: "", summary: "", contextCheck: "", sourceKeys: [] });
-const card = (id: string, kind: EvidenceCard["kind"], date: string | null): EvidenceCard => ({ id, kind, date, claim: "c" + id, sourceKeys: ["S1"], evidence: [], stage: "discover", round: 0 });
+const card = (id: string, kind: EvidenceCard["kind"], date: string | null): EvidenceCard => ({ id, kind, date, claim: "c" + id, sourceKeys: ["S1"], evidence: [], grade: "api_cited", stage: "discover", round: 0 });
 const lead = (id: string, priority: Lead["priority"], status: Lead["status"] = "open", openedInRound = 0): Lead => ({ id, priority, question: "q" + id, why: "", status, resolutionNote: "", openedInRound });
 
 function state(over: Partial<ResearchState> = {}): ResearchState {
-  return { ...emptyState({ companyName: "X", website: "", context: "", topic: "" }), entity: entity("Confirmed"), cards: [card("E1", "project", "2026-08")], people: [{ id: "P1", name: "A", role: "", organisation: "", whyRelevant: "", sourceKeys: ["S1"], evidence: [], stage: "discover" }], ...over };
+  return { ...emptyState({ companyName: "X", website: "", context: "", topic: "" }), entity: entity("Confirmed"), cards: [card("E1", "project", "2026-08")], people: [{ id: "P1", name: "A", role: "", organisation: "", whyRelevant: "", sourceKeys: ["S1"], evidence: [], grade: "api_cited", stage: "discover" }], ...over };
 }
 
 test("an ambiguous or unknown company stops the pipeline before more spending", () => {

@@ -2,7 +2,25 @@
 
 // Shared display pieces for sources and evidence. Display only.
 
-import type { EvidenceCard, LedgerSource } from "@/lib/types";
+import type { EvidenceCard, EvidenceGrade, LedgerSource } from "@/lib/types";
+
+const GRADE_LABEL: Record<EvidenceGrade, string> = {
+  api_cited: "API citation",
+  quote_verified: "verified quote",
+};
+const GRADE_HELP: Record<EvidenceGrade, string> = {
+  api_cited: "The API attached a citation (with the excerpt it returned) to this claim.",
+  quote_verified:
+    "No API citation. The source is one the web tools returned, and the quote was found word for word in the page text the API returned.",
+};
+
+export function GradeBadge({ grade }: { grade: EvidenceGrade }) {
+  return (
+    <span className="badge light" title={GRADE_HELP[grade]}>
+      {GRADE_LABEL[grade]}
+    </span>
+  );
+}
 
 /** [S3] chips that jump to the matching row of the source table. */
 export function SourceChips({ keys }: { keys: string[] }) {
@@ -75,14 +93,14 @@ export function CardView({ card }: { card: EvidenceCard }) {
     <div className="card" id={`card-${card.id}`}>
       <div>
         <span className="badge">{card.id}</span> <span className="badge light">{card.kind.replace(/_/g, " ")}</span>{" "}
-        <span className="muted">{card.date ?? "undated"}</span>
+        <GradeBadge grade={card.grade} /> <span className="muted">{card.date ?? "undated"}</span>
       </div>
       <div>
         {card.claim} <SourceChips keys={card.sourceKeys} />
       </div>
       {card.evidence.length > 0 && (
         <details>
-          <summary>Excerpt(s) the API returned for this claim</summary>
+          <summary>{card.grade === "quote_verified" ? "Verified quote" : "Excerpt(s) the API returned for this claim"}</summary>
           <ul className="plain">
             {card.evidence.map((e, i) => (
               <li key={i}>

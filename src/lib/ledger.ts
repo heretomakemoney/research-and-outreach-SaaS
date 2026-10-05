@@ -13,6 +13,8 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import type { AnswerSegment, LedgerSource, LedgerStats } from "./types";
 
+const MAX_PAGE_TEXT_CHARS = 600_000;
+
 const MAX_EXCERPTS_PER_SOURCE = 5;
 const MAX_EXCERPT_CHARS = 300;
 
@@ -41,7 +43,24 @@ export interface LedgerResult {
   rawAnswerText: string;
   /** For each text block: where it sits in rawAnswerText and which API excerpts back it. */
   segments: AnswerSegment[];
+  /**
+   * Full text of pages the API returned as text (not PDFs, not search snippets, which are encrypted),
+   * by source key. Used only inside one stage to check quotes; never stored or sent to the browser.
+   */
+  pageTexts: Record<string, string>;
   stats: LedgerStats;
+}
+
+/** What the parser needs to check a named source and quote against what the API really returned. */
+export function buildEvidenceContext(
+  sources: readonly LedgerSource[],
+  pageTexts: Record<string, string>,
+): { resolveSource(url: string): string | null; pageText(sourceKey: string): string | null } {
+  const byUrl = new Map(sources.map((s) => [canonicalUrl(s.url), s.key]));
+  return {
+    resolveSource: (url) => byUrl.get(canonicalUrl(url)) ?? null,
+    pageText: (key) => pageTexts[key] ?? null,
+  };
 }
 
 /**
@@ -84,8 +103,10 @@ export function buildLedger(
     citationsMapped: 0,
     citationsUnmapped: 0,
     citedUrlNotInResults: 0,
+    resultsViaCodeExecution: 0,
     otherBlockTypes: {},
   };
+  const pageTexts: Record<string, string> = {};
 
   function upsert(url: string): LedgerSource {
     const canon = canonicalUrl(url);
@@ -138,6 +159,7 @@ export function buildLedger(
 
       case "web_search_tool_result": {
         stats.searchResultBlocks++;
+        if (block.caller && block.caller.type !== "direct") stats.resultsViaCodeExecution++;
         if (Array.isArray(block.content)) {
           for (const result of block.content) {
             stats.searchResultsReturned++;
@@ -154,6 +176,7 @@ export function buildLedger(
 
       case "web_fetch_tool_result": {
         stats.fetchResultBlocks++;
+        if (block.caller && block.caller.type !== "direct") stats.resultsViaCodeExecution++;
         const content = block.content;
         if (content.type === "web_fetch_result") {
           stats.fetchedOk++;
@@ -162,6 +185,9 @@ export function buildLedger(
           source.fetchKind = content.content.source.type === "base64" ? "pdf" : "text";
           source.retrievedAt = content.retrieved_at;
           source.title = source.title ?? content.content.title ?? null;
+          if (content.content.source.type === "text") {
+            pageTexts[source.key] = content.content.source.data.slice(0, MAX_PAGE_TEXT_CHARS);
+          }
           fetchedInOrder.push(source);
         } else {
           const url = requestedUrlByToolUseId.get(block.tool_use_id) ?? null;
@@ -228,5 +254,5 @@ export function buildLedger(
   }
 
   const rawAnswerText = answerParts.join("");
-  return { sources, answerText: rawAnswerText.trim(), rawAnswerText, segments, stats };
+  return { sources, answerText: rawAnswerText.trim(), rawAnswerText, segments, pageTexts, stats };
 }

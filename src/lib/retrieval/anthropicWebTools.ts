@@ -9,9 +9,37 @@
 import "server-only";
 import type Anthropic from "@anthropic-ai/sdk";
 import { getClient } from "../anthropic";
-import { TOOL_VERSIONS } from "../config";
+import { TOOL_VERSIONS, WEB_TOOLS } from "../config";
 import { buildLedger } from "../ledger";
 import type { EvidenceRetriever, RetrievalRequest, RetrievalResult } from "./types";
+
+/**
+ * The two tool definitions. Exported so a test can check the settings that decide
+ * whether the API attaches citations (see WEB_TOOLS in config.ts).
+ */
+export function buildWebTools(
+  request: Pick<RetrievalRequest, "budget" | "searchCountry">,
+  settings: typeof WEB_TOOLS = WEB_TOOLS,
+): Anthropic.ToolUnion[] {
+  return [
+    {
+      type: TOOL_VERSIONS.search,
+      name: "web_search",
+      max_uses: request.budget.maxSearches,
+      user_location: { type: "approximate", country: request.searchCountry },
+      // Omitted = the tool version's default, which is dynamic filtering through code execution.
+      ...(settings.searchCaller === "direct" ? { allowed_callers: ["direct" as const] } : {}),
+    },
+    {
+      type: TOOL_VERSIONS.fetch,
+      name: "web_fetch",
+      max_uses: request.budget.maxFetches,
+      citations: { enabled: true },
+      max_content_tokens: settings.fetchMaxContentTokens,
+      ...(settings.fetchCaller === "direct" ? { allowed_callers: ["direct" as const] } : {}),
+    },
+  ];
+}
 
 export const anthropicWebTools: EvidenceRetriever = {
   id: "anthropic-web-tools",
@@ -35,20 +63,7 @@ export const anthropicWebTools: EvidenceRetriever = {
         thinking: { type: "adaptive" },
         output_config: { effort: request.effort },
         system: request.system,
-        tools: [
-          {
-            type: TOOL_VERSIONS.search,
-            name: "web_search",
-            max_uses: request.budget.maxSearches,
-            user_location: { type: "approximate", country: request.searchCountry },
-          },
-          {
-            type: TOOL_VERSIONS.fetch,
-            name: "web_fetch",
-            max_uses: request.budget.maxFetches,
-            citations: { enabled: true },
-          },
-        ],
+        tools: buildWebTools(request),
         messages,
       });
       const message = await stream.finalMessage();
@@ -71,6 +86,7 @@ export const anthropicWebTools: EvidenceRetriever = {
       retrieverId: this.id,
       rawAnswerText: ledger.rawAnswerText,
       segments: ledger.segments,
+      pageTexts: ledger.pageTexts,
       sources: ledger.sources,
       stats: ledger.stats,
       usages,

@@ -36,6 +36,8 @@ export interface RetrievalResult {
   /** The answer with [S#] markers added by our code (untrimmed). Offsets in `segments` refer to this. */
   rawAnswerText: string;
   segments: AnswerSegment[];
+  /** Full text of pages the provider returned as text, by source key (used to check quotes; never stored). */
+  pageTexts: Record<string, string>;
   /** Every source known after this run: earlier ones first, then new ones. */
   sources: LedgerSource[];
   stats: LedgerStats;

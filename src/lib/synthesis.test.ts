@@ -4,11 +4,11 @@ import { emptyState } from "./state.ts";
 import { validateEmail, validateSynthesis } from "./synthesis.ts";
 import type { EvidenceCard, ResearchState } from "./types.ts";
 
-const card = (id: string): EvidenceCard => ({ id, kind: "project", date: "2026-08", claim: `claim ${id}`, sourceKeys: ["S1"], evidence: [], stage: "discover", round: 0 });
+const card = (id: string): EvidenceCard => ({ id, kind: "project", date: "2026-08", claim: `claim ${id}`, sourceKeys: ["S1"], evidence: [], grade: "api_cited", stage: "discover", round: 0 });
 const state: ResearchState = {
   ...emptyState({ companyName: "X", website: "", context: "", topic: "" }),
   cards: [card("E1"), card("E2")],
-  people: [{ id: "P1", name: "Jane", role: "Ops", organisation: "X", whyRelevant: "", sourceKeys: ["S1"], evidence: [], stage: "discover" }],
+  people: [{ id: "P1", name: "Jane", role: "Ops", organisation: "X", whyRelevant: "", sourceKeys: ["S1"], evidence: [], grade: "api_cited", stage: "discover" }],
 };
 
 const trigger = (id: string, rank: string, cards: string[]) => ({

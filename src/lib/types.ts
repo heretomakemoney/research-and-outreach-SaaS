@@ -45,6 +45,12 @@ export interface LedgerStats {
   citationsMapped: number;
   citationsUnmapped: number;
   citedUrlNotInResults: number; // a citation pointed at a URL no tool returned
+  /**
+   * Search/fetch results that were consumed by code execution ("dynamic filtering")
+   * instead of being read directly. When this is above 0, Claude's answer is written
+   * from code output and the API attaches NO citations to it.
+   */
+  resultsViaCodeExecution: number;
   otherBlockTypes: Record<string, number>;
 }
 
@@ -101,6 +107,8 @@ export interface StageLog {
   effort: string;
   caps: { maxSearches?: number; maxFetches?: number; maxContinuations?: number; maxTokens: number };
   ledger: LedgerStats | null;
+  /** The start of the model's answer text (with [S#] markers), kept so a parsing problem can be diagnosed from the screen. */
+  answerPreview: string;
   warnings: string[];
   startedAt: string;
 }
@@ -159,6 +167,15 @@ export const CARD_KINDS: readonly CardKind[] = [
 ];
 
 /**
+ * How a card or person is tied to its source(s):
+ *  - api_cited:      the API attached a citation (with an excerpt it returned) to the text.
+ *  - quote_verified: no API citation, but the line named a source that IS in the ledger and
+ *                    its quote was found word for word in the page text the API returned.
+ * Anything else is rejected.
+ */
+export type EvidenceGrade = "api_cited" | "quote_verified";
+
+/**
  * One sourced fact. Cards are FACTS only: a claim backed by at least one
  * source. The id (E1, E2, ...) and the source keys are assigned by our code;
  * the evidence excerpts are the `cited_text` the API returned.
@@ -169,7 +186,8 @@ export interface EvidenceCard {
   date: string | null; // when the fact happened / was published, as stated; null = unknown
   claim: string;
   sourceKeys: string[]; // always at least one
-  evidence: { sourceKey: string; excerpt: string }[]; // API-returned excerpts for this claim (may be empty)
+  evidence: { sourceKey: string; excerpt: string }[]; // excerpts for this claim (API-returned, or the verified quote)
+  grade: EvidenceGrade;
   stage: "discover" | "followup";
   round: number;
 }
@@ -182,6 +200,7 @@ export interface Person {
   whyRelevant: string;
   sourceKeys: string[]; // always at least one
   evidence: { sourceKey: string; excerpt: string }[];
+  grade: EvidenceGrade;
   stage: "discover" | "followup";
 }
 

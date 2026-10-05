@@ -31,6 +31,7 @@ const card = (claim: string, keys: string[] = ["S1"]) => ({
   claim,
   sourceKeys: keys,
   evidence: [{ sourceKey: keys[0], excerpt: "exc" }],
+  grade: "api_cited" as const,
 });
 
 function merge(prior: ResearchState, p: ParsedResearch, over: Partial<Parameters<typeof mergeResearch>[2]> = {}) {
@@ -49,7 +50,7 @@ test("cards, people and leads get stable ids assigned by code", () => {
     emptyState(input),
     parsed({
       cards: [card("Fact one"), card("Fact two")],
-      people: [{ name: "Jane Roe", role: "Ops", organisation: "Indratel", whyRelevant: "x", sourceKeys: ["S1"], evidence: [] }],
+      people: [{ name: "Jane Roe", role: "Ops", organisation: "Indratel", whyRelevant: "x", sourceKeys: ["S1"], evidence: [], grade: "api_cited" as const }],
       leads: [{ priority: "high", question: "Which carrier?", why: "w" }],
     }),
   );

@@ -14,6 +14,7 @@ import "server-only";
 import { GATE, PIPELINE, STATE_LIMITS } from "../config";
 import { saveDebugCopy } from "../debug";
 import { decideNext } from "../gate";
+import { buildEvidenceContext } from "../ledger";
 import { parseResearchOutput } from "../parse";
 import {
   DISCOVER_INSTRUCTIONS,
@@ -81,7 +82,11 @@ export async function runResearchStage(
   });
 
   // 4 + 5. Read the tagged answer and merge it into the state.
-  const parsed = parseResearchOutput(retrieval.rawAnswerText, retrieval.segments);
+  const parsed = parseResearchOutput(
+    retrieval.rawAnswerText,
+    retrieval.segments,
+    buildEvidenceContext(retrieval.sources, retrieval.pageTexts),
+  );
   const merged = mergeResearch(prior, parsed, {
     stage: req.kind,
     round,
@@ -97,6 +102,16 @@ export async function runResearchStage(
     ...merged.warnings,
   ];
   if (!retrieval.rawAnswerText.trim()) warnings.push("Claude returned no answer text.");
+  if (retrieval.stats.resultsViaCodeExecution > 0 && retrieval.stats.citationsTotal === 0) {
+    warnings.push(
+      `${retrieval.stats.resultsViaCodeExecution} search/fetch result(s) were read through code execution (dynamic filtering). That mode returns no citations, so facts cannot be tied to sources. Check WEB_TOOLS in config.ts.`,
+    );
+  } else if (parsed.rejected.length > 0 && retrieval.stats.citationsTotal === 0) {
+    warnings.push("The answer contained no API citations at all, so cards could only be accepted through verified quotes.");
+  }
+  const citedCards = parsed.cards.filter((c) => c.grade === "api_cited").length;
+  const quoteCards = parsed.cards.length - citedCards;
+  if (quoteCards > 0) warnings.push(`${quoteCards} card(s) were accepted through a verified quote (no API citation); ${citedCards} through API citations.`);
   if (parsed.cards.length === 0 && parsed.people.length === 0) warnings.push("The answer contained no usable evidence cards or people.");
   if (parsed.ignoredLines > 0) warnings.push(`${parsed.ignoredLines} line(s) of the answer were not in the tagged format and were ignored.`);
 
@@ -120,6 +135,7 @@ export async function runResearchStage(
       maxTokens: cfg.maxTokens,
     },
     ledger: retrieval.stats,
+    answerPreview: retrieval.rawAnswerText,
     warnings,
     startedAt,
   });

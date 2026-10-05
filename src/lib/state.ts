@@ -141,6 +141,7 @@ export function mergeResearch(prior: ResearchState, parsed: ParsedResearch, opts
       evidence: c.evidence
         .filter((e) => knownSourceKeys.has(e.sourceKey))
         .map((e) => ({ sourceKey: e.sourceKey, excerpt: e.excerpt.slice(0, opts.limits.maxExcerptChars) })),
+      grade: c.grade,
       stage: stageLabel,
       round: opts.round,
     });
@@ -167,6 +168,7 @@ export function mergeResearch(prior: ResearchState, parsed: ParsedResearch, opts
       evidence: p.evidence
         .filter((e) => knownSourceKeys.has(e.sourceKey))
         .map((e) => ({ sourceKey: e.sourceKey, excerpt: e.excerpt.slice(0, opts.limits.maxExcerptChars) })),
+      grade: p.grade,
       stage: stageLabel,
     });
   }
@@ -405,6 +407,7 @@ export function sanitizeState(v: unknown, limits: StateLimits): ResearchState {
       claim: str(c.claim, limits.maxClaimChars),
       sourceKeys: strList(c.sourceKeys, 8, 12).filter((k) => sourceKeys.has(k)),
       evidence: evidenceList(c.evidence, limits).filter((e) => sourceKeys.has(e.sourceKey)),
+      grade: c.grade === "quote_verified" ? ("quote_verified" as const) : ("api_cited" as const),
       stage: c.stage === "followup" ? ("followup" as const) : ("discover" as const),
       round: Math.max(0, Math.floor(num(c.round))),
     }))
@@ -420,6 +423,7 @@ export function sanitizeState(v: unknown, limits: StateLimits): ResearchState {
       whyRelevant: str(p.whyRelevant, limits.maxClaimChars),
       sourceKeys: strList(p.sourceKeys, 8, 12).filter((k) => sourceKeys.has(k)),
       evidence: evidenceList(p.evidence, limits).filter((e) => sourceKeys.has(e.sourceKey)),
+      grade: p.grade === "quote_verified" ? ("quote_verified" as const) : ("api_cited" as const),
       stage: p.stage === "followup" ? ("followup" as const) : ("discover" as const),
     }))
     .filter((p) => /^P\d+$/.test(p.id) && p.name && p.sourceKeys.length > 0);

@@ -37,6 +37,16 @@ This is a conceptual design. It has no SQL, no migrations and no code. Field nam
 
 **Rules.** Ids are UUIDs and times are UTC. Context and topic are snapshotted into each run, and editing context never changes past runs or emails. The research JSON is the application's own validated shape, so reading a run needs no joins. The full text of fetched pages is **not** stored. API keys never appear in any table. Row-level security is enabled with no public policies, because only the server connects.
 
+**As built in Step 3** (`db/migrations/001_init.sql`, `src/lib/repo/postgres.ts`). Where the build differs from the description above:
+
+- `research_runs` also has `seq` (a counter that breaks ties when "newest run" timestamps are equal) and `updated_at` (the last write, used to spot abandoned runs). `config_snapshot` and `intelligence_version` are **not stored yet**: the application does not produce them.
+- `relationship_kind` stores the application's values, `new` (first contact) and `existing`.
+- `outreach_emails` does not store its generation logs; they live in `stage_logs` (rows with stage `email`) and are read back with the email.
+- `stage_logs` keeps the whole log as JSON plus the columns needed for cost queries (model, cost, duration, round, start time). It is a copy of the logs already inside the run JSON, written once (unique on company, stage, round and start time).
+- **Abandoned runs.** A run still `researching` whose last write is more than 8 minutes old (a stage takes at most about 5) is closed as `partial` or `failed` the next time the app opens. A shorter gap is left alone, because the run may be driven from another tab or device. This is not resume.
+- **Access.** Only the server connects (`DATABASE_URL`). The browser calls `/api/repo`, which exposes the Repository methods and nothing else. Row-level security is on with no policies. There is no sign-in yet.
+- **Sample data** is added only on request in mock mode, with new UUIDs, and skips names that already exist.
+
 **Evidence grade.** Cards and people carry `evidence_grade`: `api_cited`, `quote_verified` or `tool_source` (the named page is one the tools returned or fetched, but its wording was not checked). This replaces the per-finding `confidence` and `excerpt_origin` fields in the sections below.
 
 ---

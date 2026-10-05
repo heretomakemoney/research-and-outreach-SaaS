@@ -13,7 +13,7 @@ Phase 1 prototype ("Q1" architecture). The product is defined in `docs/PRD.md` a
 | Synthesis | Opus 5.5 | none | 01, 02, 03 |
 | Email | Sonnet 5.5 | none | 04, 05 |
 
-Models, limits and gate rules live in `src/lib/config.ts`. `06_LEARNING_RULES.md` is never sent. Only ONE company/workflow is kept, in the browser's `localStorage`. No database.
+Models, limits and gate rules live in `src/lib/config.ts`. `06_LEARNING_RULES.md` is never sent. Companies, research runs, contacts and emails are saved in PostgreSQL (see Database below).
 
 ## Mock mode (free) and live mode (paid)
 
@@ -24,11 +24,24 @@ Models, limits and gate rules live in `src/lib/config.ts`. `06_LEARNING_RULES.md
 
 Set `AI_MODE=live` or `AI_MODE=mock` explicitly to override. Vercel Preview deployments are mock by default; the Vercel production site is live. The sample is mock data only and is never used by live research (a test enforces this).
 
+## Database (Supabase / PostgreSQL)
+
+Everything you create (companies, research runs, contacts, the current email per company) is saved in PostgreSQL through the server. The browser never sees the connection string.
+
+1. Create a Supabase project and copy the **Transaction pooler** connection string (Connect button, Connection string).
+2. Set it as `DATABASE_URL` (Vercel environment variables, or `.env.local` locally). It contains the database password: never commit it or paste it into chat.
+3. Once, run `db/migrations/001_init.sql` in the Supabase **SQL Editor** (paste, Run). Safe to run twice.
+4. Open the app. If the tables are missing or `DATABASE_URL` is wrong, the screen says so in plain words.
+
+In mock mode, **Add sample accounts** adds the Upper Hunter sample and four clearly fake accounts to the database (once; existing names are skipped). Delete them from each account's page. Mock research is saved like any other, labelled "sample research". There is no sign-in yet, so keep the deployment protected (for example Vercel Authentication).
+
+Tests: `npm test` runs the repository tests against the in-memory repository. To run the same tests against a real PostgreSQL database, set `TEST_DATABASE_URL` to a throwaway local database (the test makes and drops its own schema). Do not point it at your Supabase project.
+
 ## Run it on your own computer
 
 1. Node.js 20 or newer. Check with `node -v`.
 2. `npm install`
-3. `cp .env.example .env.local` and put your Anthropic API key after `ANTHROPIC_API_KEY=`. `.env.local` is git-ignored. Never paste the key into chat or a commit.
+3. `cp .env.example .env.local` and put your Anthropic API key after `ANTHROPIC_API_KEY=` and your database string after `DATABASE_URL=`. `.env.local` is git-ignored. Never paste the key into chat or a commit.
 4. `npm run dev`, then open http://localhost:3000
 
 Each research run makes real, paid Anthropic calls. The page shows an estimated cost per stage and in total (an estimate, not a bill; the Anthropic Console Usage page is authoritative).

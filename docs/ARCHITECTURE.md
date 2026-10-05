@@ -32,7 +32,7 @@ The **top section below is the current architecture.** Sections 0 to 17 are the 
 | Phase | Goal | What it has | Status |
 |---|---|---|---|
 | **1. Research prototype** | Prove the pipeline matches Claude Project research quality | Next.js app, the staged pipeline, results, angle and contact selection, email, one workflow in browser `localStorage`, deployed on Vercel | **Done.** The pipeline works end to end. The UI was too verbose |
-| **2. Usable V1** | Something you open every week | Accounts table, company page (Research and Outreach), company context and per-run topic, saved companies, research runs and the one current email per company, in **PostgreSQL (Supabase)**; **one company at a time** | In progress. Step 2: UI on mock data. Step 3: PostgreSQL. Later: resume interrupted runs, authentication |
+| **2. Usable V1** | Something you open every week | Accounts table, company page (Research and Outreach), company context and per-run topic, saved companies, research runs and the one current email per company, in **PostgreSQL (Supabase)**; **one company at a time** | In progress. Step 2: UI on mock data (done). Step 3: PostgreSQL persistence (done). Later: resume interrupted runs, authentication, UI polish pass |
 | **3. Full V1** | Everything in the PRD and USER_FLOW | Background worker, Queued status, batch of up to 5, leaving and returning during research | Not started |
 
 Cost optimisation of the research pipeline happens after Phase 2 works. The live pipeline is frozen until then.

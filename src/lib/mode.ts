@@ -6,11 +6,12 @@
 //
 // Which one is used:
 //   1. AI_MODE=live | mock, if set (an unrecognised value counts as mock: the safe choice);
-//   2. otherwise production builds (Vercel deployments) are live, and everything else
-//      (`npm run dev`, tests) is mock.
+//   2. otherwise Vercel PREVIEW deployments are mock (Vercel builds them with NODE_ENV=production, so
+//      NODE_ENV alone cannot tell a preview from the real site), the Vercel production site is live,
+//      and everything else (`npm run dev`, tests) is mock.
 //
-// So local development cannot spend money by accident, and a deployed site behaves exactly as before
-// unless you set AI_MODE=mock on it (for example for Vercel Preview deployments).
+// So local development and previews cannot spend money by accident, and the production site behaves
+// exactly as before.
 //
 // No server-only imports: used by server code, the layout banner and tests.
 
@@ -22,6 +23,7 @@ export function aiMode(env: Env = process.env): AiMode {
   const explicit = env.AI_MODE?.trim().toLowerCase();
   if (explicit === "live" || explicit === "mock") return explicit;
   if (explicit) return "mock";
+  if (env.VERCEL_ENV === "preview" || env.VERCEL_ENV === "development") return "mock";
   return env.NODE_ENV === "production" ? "live" : "mock";
 }
 

@@ -155,6 +155,9 @@ test("mode rules: explicit setting wins, production is live, everything else (de
   assert.equal(aiMode({ AI_MODE: "live" }), "live");
   assert.equal(aiMode({ AI_MODE: "MOCK", NODE_ENV: "production" }), "mock");
   assert.equal(aiMode({ NODE_ENV: "production" }), "live");
+  assert.equal(aiMode({ NODE_ENV: "production", VERCEL_ENV: "preview" }), "mock");
+  assert.equal(aiMode({ NODE_ENV: "production", VERCEL_ENV: "production" }), "live");
+  assert.equal(aiMode({ NODE_ENV: "production", VERCEL_ENV: "preview", AI_MODE: "live" }), "live");
   assert.equal(aiMode({ NODE_ENV: "development" }), "mock");
   assert.equal(aiMode({}), "mock");
   assert.equal(aiMode({ AI_MODE: "yes please", NODE_ENV: "production" }), "mock", "an unrecognised value is the safe choice");
@@ -193,7 +196,7 @@ const root = process.cwd();
 const rel = (f: string) => path.relative(root, f).split(path.sep).join("/");
 
 test("only the mock code and the runner switch import the fixture or the mock modules", () => {
-  const allowed = (f: string) => f.startsWith("src/lib/mock/") || f === "src/lib/mock.test.ts" || f === "src/lib/stages/runners.ts";
+  const allowed = (f: string) => f.startsWith("src/lib/mock/") || f === "src/lib/mock.test.ts" || f === "src/lib/v1.test.ts" || f === "src/lib/stages/runners.ts" || f === "src/lib/repo/browser.ts";
   const offenders: string[] = [];
   for (const file of walk(path.join(root, "src")).filter((f) => /\.(ts|tsx)$/.test(f))) {
     const name = rel(file);

@@ -22,7 +22,7 @@ Models, limits and gate rules live in `src/lib/config.ts`. `06_LEARNING_RULES.md
 - **mock**: answers come from a saved sample (`src/fixtures/`, Upper Hunter, whatever company you type). The Anthropic client is never created, so nothing can be spent. A yellow banner shows on every page. This is the default for `npm run dev` and tests, and is for developing the UI and database.
 - **live**: real, paid calls. This is the default on Vercel deployments (production builds), so deployed behaviour is unchanged.
 
-Set `AI_MODE=live` or `AI_MODE=mock` explicitly to override. On Vercel, set `AI_MODE=mock` for the Preview environment to make previews free. The sample is mock data only and is never used by live research (a test enforces this).
+Set `AI_MODE=live` or `AI_MODE=mock` explicitly to override. Vercel Preview deployments are mock by default; the Vercel production site is live. The sample is mock data only and is never used by live research (a test enforces this).
 
 ## Run it on your own computer
 

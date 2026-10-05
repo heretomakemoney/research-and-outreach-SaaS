@@ -155,6 +155,9 @@ test("mode rules: explicit setting wins, production is live, everything else (de
   assert.equal(aiMode({ AI_MODE: "live" }), "live");
   assert.equal(aiMode({ AI_MODE: "MOCK", NODE_ENV: "production" }), "mock");
   assert.equal(aiMode({ NODE_ENV: "production" }), "live");
+  assert.equal(aiMode({ NODE_ENV: "production", VERCEL_ENV: "preview" }), "mock");
+  assert.equal(aiMode({ NODE_ENV: "production", VERCEL_ENV: "production" }), "live");
+  assert.equal(aiMode({ NODE_ENV: "production", VERCEL_ENV: "preview", AI_MODE: "live" }), "live");
   assert.equal(aiMode({ NODE_ENV: "development" }), "mock");
   assert.equal(aiMode({}), "mock");
   assert.equal(aiMode({ AI_MODE: "yes please", NODE_ENV: "production" }), "mock", "an unrecognised value is the safe choice");

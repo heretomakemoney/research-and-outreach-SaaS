@@ -5,18 +5,17 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { AddCompanyPanel } from "@/components/CompanyPanels";
 import { SignalLabel, StatusLabel, fmtDate } from "@/components/ui";
-import { useRepoQuery, useServerMode, useStorageProblem } from "@/lib/client/manager";
+import { useRepoQuery, useServerMode } from "@/lib/client/manager";
 import type { AccountRow, TopSignal } from "@/lib/domain";
-import { clearAllData, loadSampleData } from "@/lib/repo/browser";
+import { getRepository } from "@/lib/repo/browser";
 
 type SortKey = "name" | "status" | "signal" | "researched" | "recent";
 
 const STATUS_ORDER = { researching: 0, done: 1, partial: 2, failed: 3, not_researched: 4 } as const;
 const SIGNAL_ORDER: Record<TopSignal, number> = { strong: 0, medium: 1, weak: 2, hook: 3, none: 4 };
-const SEEDED_FLAG = "ror:v3:sample-offered";
 
 function compare(a: AccountRow, b: AccountRow, key: SortKey): number {
   switch (key) {
@@ -37,22 +36,19 @@ export default function AccountsPage() {
   const router = useRouter();
   const { data: rows, error } = useRepoQuery((repo) => repo.listAccounts(), []);
   const mode = useServerMode();
-  const storageProblem = useStorageProblem();
+  const [sampleError, setSampleError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<{ key: SortKey; dir: 1 | -1 }>({ key: "recent", dir: 1 });
   const [adding, setAdding] = useState(false);
 
-  // In mock mode, offer the sample accounts once on first visit so there is something to look at.
-  useEffect(() => {
-    if (mode !== "mock" || !rows || rows.length > 0) return;
+  async function addSamples() {
+    setSampleError(null);
     try {
-      if (window.localStorage.getItem(SEEDED_FLAG)) return;
-      window.localStorage.setItem(SEEDED_FLAG, "1");
-    } catch {
-      /* storage blocked: skip the automatic load */
+      await getRepository().addSampleAccounts();
+    } catch (e) {
+      setSampleError(e instanceof Error ? e.message : String(e));
     }
-    void loadSampleData();
-  }, [mode, rows]);
+  }
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -83,7 +79,7 @@ export default function AccountsPage() {
         </button>
       </div>
 
-      {storageProblem && <div className="notice error">{storageProblem}</div>}
+      {sampleError && <div className="notice error">{sampleError}</div>}
       {error && <div className="notice error">{error}</div>}
 
       {empty ? (
@@ -95,8 +91,8 @@ export default function AccountsPage() {
               Add company
             </button>
             {mode === "mock" && (
-              <button type="button" className="secondary" onClick={() => void loadSampleData()}>
-                Load sample data
+              <button type="button" className="secondary" onClick={() => void addSamples()}>
+                Add sample accounts
               </button>
             )}
           </div>
@@ -150,28 +146,13 @@ export default function AccountsPage() {
         </>
       )}
 
-      {mode === "mock" && (
+      {mode === "mock" && rows && rows.length > 0 && (
         <p className="footnote">
-          Sample data (mock mode).{" "}
-          <button
-            type="button"
-            className="linklike"
-            onClick={() => {
-              if (window.confirm("Replace everything with the sample data?")) void loadSampleData();
-            }}
-          >
-            Reset sample data
+          Mock mode.{" "}
+          <button type="button" className="linklike" onClick={() => void addSamples()}>
+            Add sample accounts
           </button>{" "}
-          ·{" "}
-          <button
-            type="button"
-            className="linklike"
-            onClick={() => {
-              if (window.confirm("Delete all companies, research and emails stored in this browser?")) clearAllData();
-            }}
-          >
-            Delete all data
-          </button>
+          (accounts that already exist are skipped). Delete any account from its own page.
         </p>
       )}
 

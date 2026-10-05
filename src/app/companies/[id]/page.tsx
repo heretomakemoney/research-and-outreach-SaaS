@@ -68,6 +68,7 @@ export default function CompanyPage({ params }: { params: Promise<{ id: string }
   const latestRun = latest.data ?? null;
   const status: AccountStatus = active ? "researching" : latestRun ? (latestRun.status as AccountStatus) : "not_researched";
   const hasResearch = !!run;
+  const runningElsewhere = !active && latestRun?.status === "researching";
   const newerFailed = !active && latestRun && latestRun.id !== run?.id && latestRun.status !== "done";
 
   async function remove() {
@@ -93,7 +94,7 @@ export default function CompanyPage({ params }: { params: Promise<{ id: string }
           </div>
         </div>
         <div className="row">
-          <button type="button" disabled={!!active} onClick={() => setPanel("research")}>
+          <button type="button" disabled={!!active || runningElsewhere} onClick={() => setPanel("research")}>
             {hasResearch ? "Research again" : "Start research"}
           </button>
           <div className="menu-wrap">
@@ -120,6 +121,11 @@ export default function CompanyPage({ params }: { params: Promise<{ id: string }
       {active && (
         <div className="notice progress" role="status">
           <strong>{active.stageLabel}…</strong> {fmtDuration(stageElapsed)} on this step, {fmtDuration(elapsed)} total. Keep this tab open; progress is saved after each step.
+        </div>
+      )}
+      {runningElsewhere && (
+        <div className="notice warn" role="status">
+          Research for this company is in progress in another tab or on another device. If it stops, it is marked interrupted a few minutes after its last activity, and you can research again.
         </div>
       )}
       {newerFailed && latestRun && (

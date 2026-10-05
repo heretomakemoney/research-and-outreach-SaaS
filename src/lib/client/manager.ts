@@ -3,7 +3,7 @@
 // The single research manager for this browser tab, plus small React hooks around the repository.
 
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { getPersistError, getRepository } from "../repo/browser";
+import { getRepository } from "../repo/browser";
 import type { Repository } from "../repo/types";
 import { ResearchManager, httpCall, type ActiveResearch } from "./research";
 
@@ -71,17 +71,6 @@ export function useServerMode(): "mock" | "live" | null {
     };
   }, []);
   return mode;
-}
-
-export function useStorageProblem(): string | null {
-  const [problem, setProblem] = useState<string | null>(null);
-  useEffect(() => {
-    const repo = getRepository();
-    const check = () => setProblem(getPersistError());
-    check();
-    return repo.subscribe(check);
-  }, []);
-  return problem;
 }
 
 /** Seconds since `since`, ticking once a second. */

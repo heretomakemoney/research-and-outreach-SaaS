@@ -101,7 +101,11 @@ export function deriveSummary(research: ResearchState, synthesis: Synthesis | nu
 
 /** Most recent first. */
 export function newestFirst(runs: ResearchRun[]): ResearchRun[] {
-  return [...runs].sort((a, b) => b.startedAt.localeCompare(a.startedAt));
+  // Equal timestamps: the one added later is newer.
+  return runs
+    .map((run, i) => ({ run, i }))
+    .sort((a, b) => b.run.startedAt.localeCompare(a.run.startedAt) || b.i - a.i)
+    .map((x) => x.run);
 }
 
 /** PRD FR-11: the most recent Done run, else the most recent Partial run. A Failed run is never the default. */

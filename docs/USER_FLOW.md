@@ -755,6 +755,15 @@ Decisions made after the Phase 1 prototype:
 - **Interrupted runs** cannot be resumed yet; that comes after database persistence.
 - **Authentication** is decided at the production step.
 
+### Step 2 review outcome and deferred UI polish pass (2026-10-05)
+
+- The **Step 2 information architecture is functionally approved**: Accounts → Company → Research / Outreach → Email.
+- The **current visual implementation is not final.** It is a functional first version and looks like an internal tool.
+- **Before V1 is complete there must be a dedicated UI simplification and polish pass.** It is intentionally deferred until persistence and live V1 functionality are complete, and is not done as part of Step 2 or Step 3.
+- The normal **Research view should become substantially more concise and action-oriented**: less repetition between the summary, the strongest signal and the best opportunity, and less shown by default.
+- **Detailed research and evidence stay available but secondary** (collapsed or one interaction away, never removed).
+- **Outreach setup should be simplified visually**: it is currently too large and form-heavy.
+
 ---
 
 ## 19. Remaining Questions

@@ -8,6 +8,7 @@
 import type { AccountRow, Company, ManualContact, OutreachEmail, ResearchRun } from "../domain";
 import { newestFirst, pickDefaultRun } from "../summary";
 import { deriveSummary } from "../summary";
+import { buildAccountRow } from "./accounts";
 import type { NewCompany, Repository, SelectionPatch } from "./types";
 
 export interface StoreData {
@@ -25,23 +26,7 @@ export interface MemoryOptions {
   onChange?: (data: StoreData) => void;
 }
 
-export function minutesAgo(then: string, now: Date): string {
-  const m = Math.max(0, Math.round((now.getTime() - new Date(then).getTime()) / 60000));
-  if (m < 1) return "just now";
-  if (m < 60) return `${m} min ago`;
-  const h = Math.round(m / 60);
-  if (h < 24) return `${h} h ago`;
-  return `${Math.round(h / 24)} d ago`;
-}
-
-function shortReason(run: ResearchRun): string {
-  const r = run.statusReason ?? "";
-  if (/unclear|ambiguous/i.test(r)) return "Company unclear";
-  if (/not found|no matching/i.test(r)) return "Company not found";
-  if (run.status === "partial") return "Incomplete results";
-  if (run.status === "failed") return "No usable results";
-  return "";
-}
+export { minutesAgo } from "./accounts";
 
 export class MemoryRepository implements Repository {
   private data: StoreData;
@@ -102,26 +87,12 @@ export class MemoryRepository implements Repository {
       const runs = this.runsOf(c.id);
       const latest = newestFirst(runs)[0] ?? null;
       const def = pickDefaultRun(runs);
-      const status = latest ? latest.status : "not_researched";
-      let statusDetail = "";
-      if (latest?.status === "researching") {
-        statusDetail = `Started ${minutesAgo(latest.startedAt, now)}${def ? ". Earlier research available" : ""}`;
-      } else if (latest && latest.status !== "done") {
-        statusDetail = shortReason(latest);
-      }
-      return {
-        id: c.id,
-        name: c.name,
-        website: c.website,
-        status,
-        statusDetail,
-        hasEarlierResearch: !!def && latest?.id !== def.id,
-        industry: def?.summary?.industry ?? null,
-        clientType: def?.summary?.clientType ?? null,
-        topSignal: def?.summary?.topSignal ?? null,
-        lastResearchedAt: def?.finishedAt ?? null,
-        lastActivityAt: c.lastActivityAt,
-      };
+      return buildAccountRow(
+        c,
+        latest && { id: latest.id, status: latest.status, startedAt: latest.startedAt, statusReason: latest.statusReason },
+        def && { id: def.id, industry: def.summary?.industry ?? null, clientType: def.summary?.clientType ?? null, topSignal: def.summary?.topSignal ?? null, finishedAt: def.finishedAt },
+        now,
+      );
     });
   }
 

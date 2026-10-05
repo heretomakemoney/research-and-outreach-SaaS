@@ -193,7 +193,7 @@ const root = process.cwd();
 const rel = (f: string) => path.relative(root, f).split(path.sep).join("/");
 
 test("only the mock code and the runner switch import the fixture or the mock modules", () => {
-  const allowed = (f: string) => f.startsWith("src/lib/mock/") || f === "src/lib/mock.test.ts" || f === "src/lib/stages/runners.ts";
+  const allowed = (f: string) => f.startsWith("src/lib/mock/") || f === "src/lib/mock.test.ts" || f === "src/lib/v1.test.ts" || f === "src/lib/stages/runners.ts" || f === "src/lib/repo/browser.ts";
   const offenders: string[] = [];
   for (const file of walk(path.join(root, "src")).filter((f) => /\.(ts|tsx)$/.test(f))) {
     const name = rel(file);

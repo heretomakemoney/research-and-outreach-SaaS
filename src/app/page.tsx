@@ -1,227 +1,188 @@
 "use client";
 
-// The one screen of the prototype. This code runs in YOUR BROWSER.
-//
-// Flow: company form -> research stages (discover, optional follow-up,
-// synthesis; each a separate server request) -> results (triggers, people,
-// angles) -> choose angle -> choose contact -> email -> edit / regenerate / copy.
-//
-// The whole workflow is saved through the storage layer after every step.
-// Only ONE current workflow exists; there is no history.
+// ACCOUNTS: the home screen. A simple table of companies: Company, Status, Industry, Client type,
+// Top signal, Last researched. Click a row to open the company.
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
-import CostPanel from "@/components/CostPanel";
-import EmailStep from "@/components/EmailStep";
-import ResearchView from "@/components/ResearchView";
-import { newWorkflow, pendingStage, runPendingStage, STAGE_LABEL } from "@/lib/client/pipeline";
-import { seconds, usd } from "@/lib/format";
-import { totalCost } from "@/lib/pricing";
-import { clearAll, getWorkflow, saveWorkflow } from "@/lib/storage";
-import type { StageLog, Workflow } from "@/lib/types";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { AddCompanyPanel } from "@/components/CompanyPanels";
+import { SignalLabel, StatusLabel, fmtDate } from "@/components/ui";
+import { useRepoQuery, useServerMode, useStorageProblem } from "@/lib/client/manager";
+import type { AccountRow, TopSignal } from "@/lib/domain";
+import { clearAllData, loadSampleData } from "@/lib/repo/browser";
 
-function stageName(l: StageLog): string {
-  if (l.stage === "followup") return `Follow-up round ${l.round}`;
-  if (l.stage === "discover") return "Discover";
-  if (l.stage === "synthesize") return "Synthesis";
-  return `Email ${l.round}`;
+type SortKey = "name" | "status" | "signal" | "researched" | "recent";
+
+const STATUS_ORDER = { researching: 0, done: 1, partial: 2, failed: 3, not_researched: 4 } as const;
+const SIGNAL_ORDER: Record<TopSignal, number> = { strong: 0, medium: 1, weak: 2, hook: 3, none: 4 };
+const SEEDED_FLAG = "ror:v3:sample-offered";
+
+function compare(a: AccountRow, b: AccountRow, key: SortKey): number {
+  switch (key) {
+    case "name":
+      return a.name.localeCompare(b.name);
+    case "status":
+      return STATUS_ORDER[a.status] - STATUS_ORDER[b.status];
+    case "signal":
+      return (a.topSignal ? SIGNAL_ORDER[a.topSignal] : 9) - (b.topSignal ? SIGNAL_ORDER[b.topSignal] : 9);
+    case "researched":
+      return (b.lastResearchedAt ?? "").localeCompare(a.lastResearchedAt ?? "");
+    default:
+      return b.lastActivityAt.localeCompare(a.lastActivityAt);
+  }
 }
 
-export default function Home() {
-  const [wf, setWf] = useState<Workflow | null>(null);
-  const [companyName, setCompanyName] = useState("");
-  const [website, setWebsite] = useState("");
-  const [context, setContext] = useState("");
-  const [topic, setTopic] = useState("");
+export default function AccountsPage() {
+  const router = useRouter();
+  const { data: rows, error } = useRepoQuery((repo) => repo.listAccounts(), []);
+  const mode = useServerMode();
+  const storageProblem = useStorageProblem();
+  const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<{ key: SortKey; dir: 1 | -1 }>({ key: "recent", dir: 1 });
+  const [adding, setAdding] = useState(false);
 
-  const [busyLabel, setBusyLabel] = useState<string | null>(null);
-  const [elapsed, setElapsed] = useState(0);
-  const [error, setError] = useState<string | null>(null);
-  const running = useRef(false);
-
-  // On first load: bring back what was saved in this browser.
+  // In mock mode, offer the sample accounts once on first visit so there is something to look at.
   useEffect(() => {
-    (async () => {
-      const saved = await getWorkflow();
-      if (saved) {
-        setWf(saved);
-        fillForm(saved);
-      }
-    })().catch((e) => setError(String(e)));
-  }, []);
-
-  // Count seconds while a stage is running.
-  useEffect(() => {
-    if (!busyLabel) return;
-    setElapsed(0);
-    const timer = setInterval(() => setElapsed((s) => s + 1), 1000);
-    return () => clearInterval(timer);
-  }, [busyLabel]);
-
-  function fillForm(w: Workflow) {
-    setCompanyName(w.state.input.companyName);
-    setWebsite(w.state.input.website);
-    setContext(w.state.input.context);
-    setTopic(w.state.input.topic);
-  }
-
-  /** Update the screen and save. Saving can fail (storage full); that is reported, not swallowed. */
-  async function persist(next: Workflow) {
-    setWf(next);
+    if (mode !== "mock" || !rows || rows.length > 0) return;
     try {
-      await saveWorkflow(next);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      if (window.localStorage.getItem(SEEDED_FLAG)) return;
+      window.localStorage.setItem(SEEDED_FLAG, "1");
+    } catch {
+      /* storage blocked: skip the automatic load */
     }
+    void loadSampleData();
+  }, [mode, rows]);
+
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const filtered = (rows ?? []).filter((r) => !q || [r.name, r.website, r.industry ?? "", r.clientType ?? ""].some((v) => v.toLowerCase().includes(q)));
+    return filtered.sort((a, b) => sort.dir * compare(a, b, sort.key) || a.name.localeCompare(b.name));
+  }, [rows, query, sort]);
+
+  function header(label: string, key: SortKey) {
+    const active = sort.key === key;
+    return (
+      <th aria-sort={active ? (sort.dir === 1 ? "ascending" : "descending") : "none"}>
+        <button type="button" className="th-button" onClick={() => setSort({ key, dir: active ? (sort.dir === 1 ? -1 : 1) : 1 })}>
+          {label}
+          <span aria-hidden="true">{active ? (sort.dir === 1 ? " ↑" : " ↓") : ""}</span>
+        </button>
+      </th>
+    );
   }
 
-  /** Run every pending research stage in order, saving after each. Safe to call again to resume. */
-  async function runPipeline(start: Workflow) {
-    if (running.current) return;
-    running.current = true;
-    setError(null);
-    let current = start;
-    try {
-      for (;;) {
-        const stage = pendingStage(current);
-        if (!stage) break;
-        setBusyLabel(STAGE_LABEL[stage]);
-        current = await runPendingStage(current, stage);
-        await persist(current);
-      }
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setBusyLabel(null);
-      running.current = false;
-    }
-  }
-
-  async function onSubmit(event: FormEvent) {
-    event.preventDefault();
-    if (!companyName.trim() || running.current) return;
-    if (wf && (wf.synthesis || wf.email)) {
-      const ok = window.confirm(
-        "This replaces the current research and email with a new run. (Only one company is kept at a time.) Continue?",
-      );
-      if (!ok) return;
-    }
-    const fresh = newWorkflow({
-      companyName: companyName.trim(),
-      website: website.trim(),
-      context: context.trim(),
-      topic: topic.trim(),
-    });
-    await persist(fresh);
-    await runPipeline(fresh);
-  }
-
-  async function onClear() {
-    if (!window.confirm("Delete the saved research and email from this browser?")) return;
-    await clearAll();
-    setWf(null);
-    setError(null);
-  }
-
-  const pending = wf ? pendingStage(wf) : null;
-  const logs: StageLog[] = wf ? [...wf.state.stages, ...(wf.synthesisLog ? [wf.synthesisLog] : []), ...wf.emailLogs] : [];
-  const total = totalCost(logs);
-  const stopped = wf?.next?.action === "stop_entity" ? wf.next : null;
+  const empty = rows !== undefined && rows.length === 0;
 
   return (
     <main>
-      <h1>Account research and outreach</h1>
-      <p className="muted">
-        Company → Teltonika-specific research → triggers, people and angles → choose an angle and a contact → email.
-        Every research run makes real, paid Anthropic API calls (typically a few tens of cents; the cost panel shows the
-        estimate per stage).
-      </p>
+      <div className="topbar">
+        <h1>Accounts</h1>
+        <button type="button" onClick={() => setAdding(true)}>
+          Add company
+        </button>
+      </div>
 
-      <form onSubmit={onSubmit}>
-        <label>
-          Company name (required)
-          <input value={companyName} onChange={(e) => setCompanyName(e.target.value)} required maxLength={200} />
-        </label>
-        <label>
-          Website <span className="hint">(optional)</span>
-          <input value={website} onChange={(e) => setWebsite(e.target.value)} maxLength={300} placeholder="https://" />
-        </label>
-        <label>
-          Company context <span className="hint">(optional: what you privately know; treated as unverified)</span>
-          <textarea value={context} onChange={(e) => setContext(e.target.value)} maxLength={4000} />
-        </label>
-        <label>
-          Research topic <span className="hint">(optional: a question for this run only)</span>
-          <textarea value={topic} onChange={(e) => setTopic(e.target.value)} maxLength={1000} />
-        </label>
-        <div className="row">
-          <button type="submit" disabled={!!busyLabel || !companyName.trim()}>
-            {busyLabel ? "Researching…" : wf ? "Start new research" : "Research"}
-          </button>
-          {wf && !busyLabel && pending && (
-            <button type="button" className="secondary" onClick={() => runPipeline(wf)}>
-              Continue research (next: {STAGE_LABEL[pending].split(":")[0].toLowerCase()})
+      {storageProblem && <div className="notice error">{storageProblem}</div>}
+      {error && <div className="notice error">{error}</div>}
+
+      {empty ? (
+        <div className="empty">
+          <h2>No companies yet.</h2>
+          <p className="muted">Add a company to research it, see who to contact and what to say.</p>
+          <div className="row center">
+            <button type="button" onClick={() => setAdding(true)}>
+              Add company
             </button>
-          )}
-        </div>
-      </form>
-
-      {busyLabel && (
-        <div className="panel progress">
-          <strong>{busyLabel}</strong> · {elapsed}s
-          <div className="muted">Keep this tab open. Research stages usually take 1–2 minutes each.</div>
-        </div>
-      )}
-
-      {error && <div className="error">{error}</div>}
-
-      {wf && logs.length > 0 && (
-        <div className="panel">
-          <strong>Progress</strong>
-          <ul className="plain">
-            {logs
-              .filter((l) => l.stage !== "email")
-              .map((l, i) => (
-                <li key={i}>
-                  ✓ {stageName(l)} · {seconds(l.durationMs)} · {usd(l.cost.totalUsd)}
-                  {l.usage.searchRequests > 0 ? ` · ${l.usage.searchRequests} searches` : ""}
-                </li>
-              ))}
-          </ul>
-          <div className="muted">
-            Total so far: {usd(total.totalUsd)} (estimate), {total.searches} searches, {total.fetches} fetches.
+            {mode === "mock" && (
+              <button type="button" className="secondary" onClick={() => void loadSampleData()}>
+                Load sample data
+              </button>
+            )}
           </div>
-          {wf.next && !wf.synthesis && (
-            <div className="muted">
-              Gate decision: <strong>{wf.next.action}</strong>. {wf.next.reason}
-            </div>
-          )}
         </div>
+      ) : (
+        <>
+          <div className="toolbar">
+            <input type="search" placeholder="Filter companies" value={query} onChange={(e) => setQuery(e.target.value)} aria-label="Filter companies" />
+            <span className="muted">{rows === undefined ? "Loading…" : `${visible.length} of ${rows.length}`}</span>
+          </div>
+          <div className="table-wrap">
+            <table className="accounts">
+              <thead>
+                <tr>
+                  {header("Company", "name")}
+                  {header("Status", "status")}
+                  <th>Industry</th>
+                  <th>Client type</th>
+                  {header("Top signal", "signal")}
+                  {header("Last researched", "researched")}
+                </tr>
+              </thead>
+              <tbody>
+                {visible.map((r) => (
+                  <tr key={r.id} className="clickable" onClick={() => router.push(`/companies/${r.id}`)}>
+                    <td>
+                      <Link href={`/companies/${r.id}`} onClick={(e) => e.stopPropagation()} className="company-link">
+                        {r.name}
+                      </Link>
+                    </td>
+                    <td>
+                      <StatusLabel status={r.status} />
+                      {r.statusDetail && <div className="sub">{r.statusDetail}</div>}
+                    </td>
+                    <td>{r.industry ?? ""}</td>
+                    <td>{r.clientType ?? ""}</td>
+                    <td>{r.status === "not_researched" ? "" : <SignalLabel signal={r.topSignal} />}</td>
+                    <td>{fmtDate(r.lastResearchedAt)}</td>
+                  </tr>
+                ))}
+                {visible.length === 0 && rows && rows.length > 0 && (
+                  <tr>
+                    <td colSpan={6} className="muted center">
+                      No companies match &ldquo;{query}&rdquo;.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
-      {stopped && (
-        <div className="warning">
-          <strong>Research stopped before spending more.</strong> {stopped.reason}
-          {wf?.state.entity?.matchNote && <div>What was found: {wf.state.entity.matchNote}</div>}
-        </div>
-      )}
-
-      {wf && (wf.state.cards.length > 0 || wf.state.entity) && (
-        <ResearchView
-          wf={wf}
-          onSelectAngle={(id) => persist({ ...wf, selectedAngleId: id, updatedAt: new Date().toISOString() })}
-        />
-      )}
-
-      {wf && wf.synthesis && <EmailStep wf={wf} onChange={persist} />}
-
-      {wf && <CostPanel wf={wf} />}
-
-      {wf && (
-        <p>
-          <button type="button" className="secondary" onClick={onClear}>
-            Clear saved data
+      {mode === "mock" && (
+        <p className="footnote">
+          Sample data (mock mode).{" "}
+          <button
+            type="button"
+            className="linklike"
+            onClick={() => {
+              if (window.confirm("Replace everything with the sample data?")) void loadSampleData();
+            }}
+          >
+            Reset sample data
+          </button>{" "}
+          ·{" "}
+          <button
+            type="button"
+            className="linklike"
+            onClick={() => {
+              if (window.confirm("Delete all companies, research and emails stored in this browser?")) clearAllData();
+            }}
+          >
+            Delete all data
           </button>
         </p>
+      )}
+
+      {adding && (
+        <AddCompanyPanel
+          onClose={() => setAdding(false)}
+          onCreated={(id) => {
+            setAdding(false);
+            router.push(`/companies/${id}`);
+          }}
+        />
       )}
     </main>
   );

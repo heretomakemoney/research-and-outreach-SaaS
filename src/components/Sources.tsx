@@ -25,16 +25,48 @@ export function GradeBadge({ grade }: { grade: EvidenceGrade }) {
   );
 }
 
-/** [S3] chips that jump to the matching row of the source table. */
+/** Open every collapsed <details> around an element, then scroll to it. */
+export function openAndScroll(id: string) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  let node: HTMLElement | null = el.parentElement;
+  while (node) {
+    if (node instanceof HTMLDetailsElement) node.open = true;
+    node = node.parentElement;
+  }
+  el.scrollIntoView({ behavior: "smooth", block: "center" });
+  el.classList.add("flash");
+  setTimeout(() => el.classList.remove("flash"), 1600);
+}
+
+/** [S3] chips that jump to the matching row of the source table (opening it if it is collapsed). */
 export function SourceChips({ keys }: { keys: string[] }) {
   return (
     <>
       {keys.map((k) => (
-        <a key={k} className="marker" href={`#source-${k}`}>
+        <a
+          key={k}
+          className="marker"
+          href={`#source-${k}`}
+          onClick={(e) => {
+            e.preventDefault();
+            openAndScroll(`source-${k}`);
+          }}
+        >
           [{k}]
         </a>
       ))}
     </>
+  );
+}
+
+/** Shown on compact rows only when the evidence is the weakest grade. */
+export function GradeChip({ grade }: { grade: EvidenceGrade | null }) {
+  if (grade !== "tool_source") return null;
+  return (
+    <span className="badge light" title={GRADE_HELP.tool_source}>
+      source named, wording unchecked
+    </span>
   );
 }
 

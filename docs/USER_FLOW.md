@@ -1,13 +1,15 @@
 # V1 User Flow
 
 **Product:** Account Research & Outreach Tool (working title)
-**Version:** Draft 0.2 for approval
-**Date:** 2026-10-03
+**Version:** Draft 0.3 (Draft 0.2 reconciled with Phase 1 and the Phase 2 plan)
+**Date:** 2026-10-05
 **Inputs:** `docs/PRD.md` (locked V1 scope, what the product does) and `docs/intelligence/` (how research, triggers and outreach behave)
 
 This is a functional UX document. It defines screens, content, actions and transitions. It does not define colours, fonts, branding, spacing, component styling, architecture or APIs. Where it names a control ("button", "panel", "tag") it describes behaviour, not appearance.
 
 Terms (company context, research topic, angle, batch, research status, outreach mode) are used as defined in the PRD terminology section.
+
+> **Delivery note (2026-10-05).** The usable V1 is **Phase 2: one company at a time.** Everything about batches, selecting several rows, the Queued status and leaving while research runs in the background is the **Phase 3** target and is marked *(Phase 3)* below. Research results are reorganised (section 10): summary, best opportunity, other useful opportunities, people and angles first; everything else is one interaction away. Evidence grade replaces "confidence". The relationship (first or existing contact) is chosen when writing the email (section 13). The accounts table column order is Company · Status · Industry · Client type · Top signal · Last researched.
 
 ---
 
@@ -77,15 +79,17 @@ A compact table. One row per company. No cards.
 
 | Column | Content | Shown before research |
 |---|---|---|
-| Select | Checkbox (disabled for Queued / Researching rows) | Yes |
+| Select *(Phase 3)* | Checkbox (disabled for Queued / Researching rows). Not shown in Phase 2 | Yes |
 | **Company** | Company name (opens the company) | Yes |
-| **Industry** | One of the `01` §1 categories, or "Other" | Blank |
+| **Industry** | The category named at the start of the research classification: one of the `01` §1 categories, or "Other" | Blank |
 | **Client type** | Distributor / Integrator / End user / Unknown | Blank |
 | **Status** | Text label, plus short secondary text (below) | "Not researched" |
 | **Last researched** | Date the default research finished | Blank |
-| **Top signal** | Strongest trigger rank: Strong, Medium, Weak / Hook, or None found | Blank |
+| **Top signal** | From the primary trigger's priority: High = Strong, Medium = Medium, Low = Weak; hooks only = Hook; otherwise None found (PRD FR-34) | Blank |
 
 Blank cells stay blank. Nothing is guessed (PRD section 14).
+
+*Phase 2:* column order is Company · Status · Industry · Client type · Top signal · Last researched. There is no selection column or selection bar yet; research is started from the company page. **Queued** is not used until Phase 3. The table has a name filter and click-to-sort headers.
 
 Status text and secondary text:
 
@@ -124,6 +128,8 @@ Open a company (click the row), or **Add companies**.
 ---
 
 ## 5. Add Companies Flow
+
+> **Phase 2:** the panel adds **one** company: name (required), website, company context and an optional research topic, with **Add** and **Add and research**. Rows for up to five companies are the Phase 3 target described below.
 
 **PURPOSE**
 Add one company, or up to five, with as little typing as possible.
@@ -169,6 +175,8 @@ Behaviour:
 ---
 
 ## 6. Existing Company Batch Research Flow
+
+> **(Phase 3).** Not built in Phase 2. A single existing company is researched with **Research** / **Research again** on its company page.
 
 **PURPOSE**
 Start research, or re-research, for up to five existing companies together, with no other bulk actions.
@@ -246,6 +254,8 @@ Edit the text and start research.
 
 ## 8. Research-in-Progress Flow
 
+> **Phase 2:** research is driven by the open browser tab. The page shows the stage in progress and the cost so far. The user can move around the app, but closing the tab stops the run: completed stages are kept, the interrupted stage is lost, and research is started again. **Resuming an interrupted run comes after database persistence exists.** The "you can leave this page" behaviour below is the Phase 3 target (background processing).
+
 **PURPOSE**
 Make a multi-minute wait understandable, safe to walk away from, and honest.
 
@@ -304,7 +314,7 @@ The page is built from **dense, scannable rows with evidence on demand**, not a 
    - Buttons: **Start research** / **Research again** / **Retry research** (label depends on state), and an overflow menu with **Edit details** and **Delete company**.
    - Tabs: **Research** | **Outreach**.
 2. **State banners** (only when relevant): newer research running, research incomplete, earlier attempt failed, very little public information, company unclear, context conflict (section 15).
-3. **Results sections** in the order set out in section 10, with a **jump bar** (Triggers · Angles · People · Developments · Technology · Background · Gaps · Sources).
+3. **Results sections** in the order set out in section 10: Summary, Best opportunity, Other useful opportunities, People, Conversation angles, then a collapsed **More research** group (jump bar: Opportunities · People · Angles · More research).
 4. **Outreach setup bar** pinned at the bottom of the Research tab: "Angle: *none selected* · To: *none selected* · **Write email**".
 
 Behaviour:
@@ -333,18 +343,17 @@ The order below is by usefulness for deciding **whether and how to make contact*
 
 | # | Section | Default state | What it contains |
 |---|---|---|---|
-| 1 | **Summary** | Open | What the company does (2–3 lines); classification; trading-name result with confidence and evidence on demand (`01` §0); one **verdict line**: e.g. "Strongest signal: Strong. Remote water telemetry upgrade" or "No strong sales trigger found" or "No meaningful Teltonika angle found" |
-| 2 | **Your context** strip | Open, one or two lines | The company context, labelled as **yours**. Shows "Conflicts with public information" when flagged. **Edit** control |
-| 3 | **Triggers & hooks** | Open | Ranked findings: Primary, then Secondary, then Conversation hooks (`03` §6). Each tagged Strong / Medium / Weak / Hook |
-| 4 | **Conversation angles** | Open | Selectable angles, each pointing to its trigger. One marked **Recommended** |
-| 5 | **People** | Open | Researched people connected to the project or technology, each with role and why relevant |
-| 6 | **Other developments & projects** | Open | Dated findings and projects/contracts that are **not already shown as triggers**, newest first |
-| 7 | **Technology & vendors** | Collapsed (count shown) | Existing technology, vendors, partners, solutions seen |
-| 8 | **Background** | Collapsed (count shown) | Older projects and history, kept apart from current triggers (`01` §8) |
-| 9 | **Research gaps** | Open | What could not be established, plus watch items that are unconfirmed (never shown as triggers, `01` §10) |
-| 10 | **Sources** | Collapsed (count shown) | Every source: title, publisher type, date, aggregator flag, and the findings that cite it |
+| 1 | **Summary** | Open | What the company does (2–3 lines); industry and client type; trading-name result (`01` §0) with evidence on demand; one **verdict line** (for example "Strongest signal: Medium. Water treatment upgrade program", "No strong sales trigger found", "No meaningful Teltonika angle found"); and a one-line **Your context** strip, labelled as yours, with **Edit** and a conflict flag when relevant |
+| 2 | **Best opportunity** | Open, expanded | The primary trigger (`03` §6): title, rank, recency, FACT / INFERENCE / POSSIBLE OPPORTUNITY chain, why now, scale, evidence grade, and **View evidence** |
+| 3 | **Other useful opportunities** | Open, compact rows | Secondary triggers, then conversation hooks (`03` §6). One line each, expandable |
+| 4 | **People** | Open | Researched people connected to the project or technology, with role and why relevant; **Select as recipient** |
+| 5 | **Conversation angles** | Open | Selectable angles, each pointing to its trigger. One marked **Recommended** |
+| 6 | **More research** | Collapsed group, each part with a count | **Other developments & projects** (dated findings not already shown as opportunities, newest first) · **Technology & vendors** · **Background** (older history, kept apart from current triggers, `01` §8) · **Research gaps** (what could not be established, plus unconfirmed watch items, never shown as triggers, `01` §10) · **All findings** · **Sources** (title, type, date, aggregator flag, the findings that cite each) |
+| 7 | **Research details** | Collapsed | Evidence grades explained; per-stage usage, time and **estimated cost**; warnings; developer diagnostics (raw research text, search queries, citation counts) |
 
-**One finding, different groupings.** Triggers, developments, technology and background items are the same kind of record, grouped by what they are for. A development appears once. If it is a ranked trigger it appears under Triggers & hooks and not again under Other developments.
+The outreach setup bar stays pinned under the angles (section 9). The grouping is presentation only; every finding, source and log is stored and reachable (FR-40).
+
+**One finding, different groupings.** Opportunities, developments, technology and background items are the same kind of record, grouped by what they are for. A development appears once. If it is the best or another useful opportunity it appears there and not again under Other developments.
 
 ### Row anatomy (compact)
 
@@ -358,7 +367,7 @@ Every finding row shows enough to judge relevance without opening it (FR-39):
 - **Summary**: one line.
 - **LABEL**: exactly one of **FACT**, **INFERENCE**, **POSSIBLE OPPORTUNITY**.
 - **Date** of the underlying development, where one exists.
-- **Flags**, shown only when true: *Low confidence*, *Aggregator source*, *Conflicts with your context*, *From your context*.
+- **Flags**, shown only when true: *Source named, wording unchecked* (evidence grade "tool source"), *Aggregator source*, *Conflicts with your context*, *From your context*.
 
 Label rules:
 - A trigger or development row carries the label of its headline claim, usually **FACT**; **INFERENCE** if the claim itself is inferred (e.g. a technology implied by a job advert).
@@ -372,7 +381,7 @@ Opening a row shows, in this order:
 1. **Explanation**: what happened and why it matters, in plain language.
 2. **Evidence**: what the sources actually say.
 3. **Sources**: each with link, publisher type, date; aggregator sources flagged.
-4. **Confidence** and the reason for it.
+4. **Evidence grade** (API-cited, quote-verified or tool source), the date or "date unknown", and how recent it is.
 5. **Teltonika relevance as a chain**, with each step labelled (`02` §4):
    - FACT: what is known
    - INFERENCE: what that may imply for connectivity
@@ -496,8 +505,8 @@ V1 keeps **one current email per company**. It persists so it is not lost on ref
 
 On the **Outreach** tab:
 
-1. **Setup summary**: "Angle: … · To: Name (Role)", each with a **Change** control. Also shows "Based on research from 3 Oct 2026."
-2. **Mode line** (OR-11): "Written as **first contact**" or "Written as **re-engagement / expansion**", with the reason taken from the company context, and an **Edit context** link. When the context shows a relationship with the company but not with this person: "Your context mentions a relationship with the company, not with Dan. The email avoids personal history."
+1. **Setup summary**: "Angle: … · To: Name (Role)", each with a **Change** control, and the **Relationship**: **First contact** (default) or **Existing contact**, with an optional note. Also shows "Based on research from 3 Oct 2026."
+2. **How it was written** (OR-11): "Written as **first contact**" or "Written as **existing contact**" with the note if one was given, and an **Edit** link. The relationship is the user's choice; it is not inferred from the context, which is also passed to the email writer. For an existing contact the writer is told not to imply personal history beyond what the note and context support.
 3. **Limitation notice**, when applicable, above the email:
    - *Weak hook* (OR-13): "No strong Teltonika-relevant sales trigger was found. This email is based on a conversation hook: <hook>."
    - *Fallback angle*: "No specific trigger was found for this company. This is a general introduction and is not based on a research finding. It makes no claim about Teltonika relevance." The **Based on** list reads "No research findings used."
@@ -590,15 +599,15 @@ The product states what it found and did not find. It never fills a gap with imp
 | **Legal entity vs trading name unconfirmed** | Summary says "Trading name not confirmed. Researched under the supplied name." with the confidence level. Names are not merged (`01` §0) | Expand the evidence |
 | **Company context conflicts with public information** | "Your context" strip flagged. The affected finding shows *Conflicts with your context* and, expanded, both statements side by side. A banner links to it | Correct the context (Edit context) or ignore; the user decides |
 | **Weak conversation hook selected** | On the Outreach tab, the weak-trigger notice. The email is generated with no confirmation step | Proceed, or choose a different angle |
-| **Research still running after the user leaves** | Accounts shows the live status when they return. The company page shows progress or the finished results | Nothing needed |
-| **One company in a batch fails while others succeed** | The failed row shows **Failed** with a reason. The others continue and finish normally. There is no batch-level result screen | Open the failed company, or tick it and **Research selected** to retry |
+| **Research still running after the user leaves** | *Phase 2:* the run stops if the tab is closed; completed stages are kept and research is started again (resume comes after database persistence). *(Phase 3: Accounts shows the live status when they return, and the company page shows progress or the finished results.)* | Phase 2: keep the tab open |
+| **One company in a batch fails while others succeed** *(Phase 3)* | The failed row shows **Failed** with a reason. The others continue and finish normally. There is no batch-level result screen | Open the failed company, or tick it and **Research selected** to retry |
 | **Findings rely on weak or aggregator sources** | *Aggregator source* flag on the row; the source is marked in Sources | Judge for themselves |
-| **Low-confidence finding** | *Low confidence* flag on the row; reason in the expanded view | Judge for themselves |
-| **Sixth company in a batch** | "Maximum 5 companies at once." | Remove one, or submit a second batch |
+| **Tool-source evidence** | *Source named, wording unchecked* flag on the row; the evidence grade and what it means in the expanded view | Judge for themselves; open the source |
+| **Sixth company in a batch** *(Phase 3)* | "Maximum 5 companies at once." | Remove one, or submit a second batch |
 | **Duplicate company** | "A company with this name already exists." | **Open existing** or **Add anyway** |
 | **No research-backed angle at all** | Angles section shows only the fallback "General introduction — no specific trigger found", labelled "Not based on a research trigger" and never Recommended. The Outreach screen states the limitation | Select the fallback, or add context and research again |
 | **Email from Partial research** | Allowed. The Outreach tab notes "Based on incomplete research." | Proceed or research again |
-| **Page refreshed mid-research** | Same view, same status | Nothing needed |
+| **Page refreshed mid-research** | *Phase 2:* completed stages are kept; the interrupted stage is lost and research is started again. *(Phase 3: same view, same status.)* | Phase 2: start research again |
 
 ---
 
@@ -734,6 +743,18 @@ Re-research (from company page or Research selected):
 - Status updates in the browser without refreshing; how is an architecture matter.
 - One user, no sign-in screens in V1.
 
+### Phase 2 reconciliation (2026-10-05)
+
+Decisions made after the Phase 1 prototype:
+
+- **One company at a time** is the usable V1. Batch, selection, Queued and background research are Phase 3.
+- **Results hierarchy** is led by summary, best opportunity, other useful opportunities, people and angles. The rest is collapsed, never removed.
+- **Evidence grade** (API-cited, quote-verified, tool source) replaces per-finding confidence, because the research pipeline cannot produce a trustworthy confidence score.
+- **Relationship** is chosen by the user at email time, not inferred from the context.
+- **Industry / client type / top signal** are read from the research classification and the primary trigger's priority, with no change to the research prompts.
+- **Interrupted runs** cannot be resumed yet; that comes after database persistence.
+- **Authentication** is decided at the production step.
+
 ---
 
 ## 19. Remaining Questions
@@ -744,5 +765,5 @@ Deferred, with where they will be revisited:
 
 1. **Cancel research.** Reconsidered after architecture and testing (see "Excluded from V1 by decision").
 2. **Outreach history and multiple saved emails.** V2.
-3. **Cost, load and access protection.** Architecture stage, as recorded in PRD section 17.
+3. **Cost, load and access protection.** Cost optimisation after V1 works; access protection (authentication) at the production step, as recorded in PRD section 17.
 4. **Wording for mixed relationships** (a new person at an existing customer). `04_OUTREACH_RULES.md` §5 does not cover it. OR-10 sets a safe product rule, and any change to the intelligence file would be proposed and approved separately.

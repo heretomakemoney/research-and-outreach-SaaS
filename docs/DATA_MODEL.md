@@ -1,15 +1,43 @@
-# V1 Data Model (Proposal)
+# V1 Data Model
 
 **Product:** Account Research & Outreach Tool (working title)
-**Version:** Proposal 0.1 for review
-**Date:** 2026-10-03
+**Version:** 0.2 (Phase 2 implementation model added)
+**Date:** 2026-10-05
 **Inputs:** `docs/PRD.md`, `docs/USER_FLOW.md`, `docs/ARCHITECTURE.md`, `docs/intelligence/`
 
 This is a conceptual design. It has no SQL, no migrations and no code. Field names and types are indicative; exact names are settled when the tables are created.
 
-> **Phase note.** This PostgreSQL model belongs to the **target architecture (Phase 2 onward)**. **Phase 1 uses no database.** Phase 1 data is saved in the browser's `localStorage` through a storage layer, using records shaped like the objects below (sources, findings, people, angles, gaps, the email), so moving it into these tables later is an import and not a redesign. The database **host is not decided**: Railway PostgreSQL, Supabase and Neon are all options to choose between when Phase 2 starts. The model uses plain PostgreSQL, so any of them works, and it assumes no Supabase-specific features. See "Implementation phases" at the top of `docs/ARCHITECTURE.md`.
+> **Phase note (updated).** The database is **PostgreSQL on Supabase**, used as plain PostgreSQL (no Supabase-specific features) through a server-only connection string. **Phase 2 builds the five tables in "Phase 2 implementation" below**, with the research result stored as JSON. The fuller normalised model in sections 1 to 12 is the **Phase 3+ target**, to be built only if cross-run queries or reporting need it. The Phase 1 prototype saved the same objects in browser `localStorage`.
 
 > **Plain English.** The database is a set of tables, like spreadsheets that can point at each other. A *company* has many *research runs*. A run has many *findings*, *sources* and *people*. Each finding points at the sources that prove it. Your *context* and your *email* are stored too, but they follow different rules from the research, because research is never changed after it is saved and your context and email can be edited.
+
+---
+
+## Phase 2 implementation (what we build now)
+
+**Why not the full model yet.** Research runs are immutable and are only ever read whole: the Accounts table reads a few summary fields, and the company page loads one run. Nothing in V1 queries across runs. So each run's result is stored as **JSON** (exactly the objects the application already validates), with ordinary columns only for what the Accounts table sorts and shows, and for the human-edited data. The JSON keeps everything, so splitting it into the normalised tables later loses nothing.
+
+| Table | Holds | Mutable? |
+|---|---|---|
+| `companies` | Name, website, persistent **context**, the current selection (run, angle, contact), timestamps | Yes |
+| `research_runs` | One run: input snapshots, status, summary columns, and the whole result as JSON | While the run is in progress; frozen when it ends |
+| `stage_logs` | One row per paid or logged stage: model, tokens, searches, estimated cost, time, warnings, a short start of the raw answer | Append-only |
+| `manual_contacts` | A contact the user typed in: name, role | Yes |
+| `outreach_emails` | The company's **one current email** | Yes |
+
+**`companies`**: `id` (uuid), `name`, `website` (nullable), `context` (text, default empty), `context_updated_at`, `selected_run_id` (nullable), `selected_angle_key` (nullable text such as `A1`), `selected_person_key` (nullable text such as `P1`), `selected_manual_contact_id` (nullable; at most one of person and manual contact), `last_activity_at`, `created_at`, `updated_at`. Deleting a company deletes everything beneath it.
+
+**`research_runs`**: `id`, `company_id` (cascade), `status` (`researching`, `done`, `partial`, `failed`; `queued` arrives in Phase 3), `status_reason`; snapshots `company_name_snapshot`, `website_snapshot`, `context_snapshot`, `topic`; `started_at`, `finished_at`; `ai_mode` (`live` or `mock`); `config_snapshot` (models, limits, web-tool mode); `intelligence_version` (hash of the `docs/intelligence/` files used); **summary columns** `overview`, `industry` (the `01` §1 category or `other`), `client_type`, `verdict_line`, `top_signal` (`strong`, `medium`, `weak`, `hook`, `none`), `total_cost_usd`, `total_searches`; and JSON columns `research` (entity, evidence cards, sources, people, leads, coverage, preliminary relevance), `synthesis` (relevance, triggers, ranked people, angles, gaps), `gate_log` and `next_step`. After a run ends its row never changes. The **default run** for a company is its most recent `done` run, else its most recent `partial` run (PRD FR-11); the **latest run** is simply the newest. The Accounts table reads status from the latest run and the summary columns from the default run.
+
+**`stage_logs`**: `id`, `run_id` (nullable), `company_id` (email generations belong to a company), `stage` (`discover`, `followup`, `synthesize`, `email`), `round`, `model`, `usage` (JSON), `cost_usd`, `duration_ms`, `stop_reasons`, `rules_files`, `warnings`, `caps`, `ledger_stats`, `answer_preview`, `started_at`.
+
+**`manual_contacts`**: `id`, `company_id` (cascade), `name` (required), `role`, `created_at`.
+
+**`outreach_emails`**: `id`, `company_id` (**unique**), `run_id`, `angle_key`, `angle_title` and `angle_strength` (snapshots), `contact_origin` (`researched` or `manual`), `contact_name`, `contact_role`, `contact_person_key` (nullable), **`relationship_kind` (`first_contact` or `existing_contact`) and `relationship_note`**, `subject`, `body` (current, editable), `generated_subject`, `generated_body` (to detect edits), `used_card_ids`, `based_on` (a snapshot of the facts relied on: claim, date, evidence grade, source URLs and excerpts), `limitation` (`none`, `weak_hook`, `fallback_general`), `model`, `generation`, `generated_at`, `edited_at`, `updated_at`. Regenerate overwrites the content fields of the same row.
+
+**Rules.** Ids are UUIDs and times are UTC. Context and topic are snapshotted into each run, and editing context never changes past runs or emails. The research JSON is the application's own validated shape, so reading a run needs no joins. The full text of fetched pages is **not** stored. API keys never appear in any table. Row-level security is enabled with no public policies, because only the server connects.
+
+**Evidence grade.** Cards and people carry `evidence_grade`: `api_cited`, `quote_verified` or `tool_source` (the named page is one the tools returned or fetched, but its wording was not checked). This replaces the per-finding `confidence` and `excerpt_origin` fields in the sections below.
 
 ---
 
@@ -113,6 +141,8 @@ This is also how the data model keeps the PRD's FR-34 resolution: the Accounts t
 ---
 
 ## 4. Table definitions
+
+> **Phase 3+ target.** These are the full normalised tables. Phase 2 builds only the five tables above. Where this section says `confidence` or `excerpt_origin`, read `evidence_grade` (`api_cited`, `quote_verified`, `tool_source`).
 
 Types in brackets are indicative: *uuid*, *text*, *bool*, *int*, *date*, *timestamp*, *jsonb*, *enum*.
 
@@ -409,9 +439,9 @@ This table is the only home for speculative or unconfirmed items (`01` §10).
 | `trigger_rank` | strong, medium, weak_hook |
 | `trigger_group` | primary, secondary, hook |
 | `top_signal_rank` | strong, medium, weak_hook, none |
-| `confidence` | high, medium, low |
+| `confidence` | *Not used.* Replaced by `evidence_grade` |
 | `context_flag` | none, from_context, conflicts_with_context |
-| `excerpt_origin` | api_citation, quote_verified, quote_unverified |
+| `evidence_grade` | api_cited, quote_verified, tool_source |
 | `angle_kind` | research_backed, context_derived, fallback_general |
 | `gap_kind` | not_found, not_completed, watch_item |
 | `email_mode` | first_contact, re_engagement |
@@ -517,6 +547,6 @@ What the Accounts table shows for this company: Status **Researching** (run 2, "
 
 ## 12. Open data-model questions
 
-1. **Store fetched page text (`source_document`)?** It enables verifying quotes and showing longer evidence, and costs storage. Recommendation: store it in the first build and purge later if size matters.
-2. **Keep a full copy of the intelligence files per run, or only a hash?** Recommendation: the hash, with the git history as the record.
-3. **Add a nightly backup of the small human-authored tables** (company, context, manual contacts, email)? Tied to the backup decision in `ARCHITECTURE.md` section 15.
+1. **Store fetched page text (`source_document`)?** **Decided: no.** We hold page text only for plain web pages, only in memory during a stage, and PDFs are not readable by our code. Evidence keeps short excerpts.
+2. **Keep a full copy of the intelligence files per run, or only a hash?** **Decided: the hash** (`intelligence_version`), with git history as the record.
+3. **Backups.** Use the database host's default backups for V1; revisit with the authentication and production step.

@@ -1,12 +1,12 @@
-# V1 Technical Architecture (Proposal)
+# V1 Technical Architecture
 
 **Product:** Account Research & Outreach Tool (working title)
-**Version:** Proposal 0.2 (phased implementation added)
-**Date:** 2026-10-04
+**Version:** 0.3 (reconciled with Phase 1 results and the Phase 2 plan)
+**Date:** 2026-10-05
 **Inputs:** `docs/PRD.md` (what), `docs/USER_FLOW.md` (how it behaves), `docs/intelligence/` (research, trigger and outreach logic)
 **Companion document:** `docs/DATA_MODEL.md`
 
-This is a proposal, not a build. No code, no installed packages, no migrations. Nothing here changes the locked PRD or USER_FLOW.
+The **top section below is the current architecture.** Sections 0 to 17 are the original researched proposal; where a section is marked *superseded* the top section wins. Nothing here changes the locked PRD or USER_FLOW.
 
 **How much to trust the numbers.**
 - Anthropic prices, tool behaviour and limits were read from Anthropic's official documentation on 2026-10-03.
@@ -15,123 +15,64 @@ This is a proposal, not a build. No code, no installed packages, no migrations. 
 
 ---
 
-## Implementation phases (read this first)
+## Current architecture and implementation phases (read this first)
 
-**This document describes the TARGET V1 architecture** (sections 0–17). The product is still the one defined in `docs/PRD.md` and `docs/USER_FLOW.md`, unchanged. What changes is the **order we build it in**. We build in three phases, so a genuinely useful tool exists sooner and the riskiest question (research quality) is answered before the infrastructure is built.
+### Status of the rest of this document
 
-### The three phases
+| Sections | Status |
+|---|---|
+| 0, 1, 2, 6, 9, 11, 13, 14, 16 | Still valid background and rationale |
+| 3 (system), 4 (research pipeline), 5 (services), 7 (structured output) | **Superseded** by "The implemented research pipeline" below. Parallel discovery threads, a separate structuring step and 13 to 15 calls were replaced by 3 to 5 staged calls |
+| 8 (cost) | **Superseded**: measured numbers below |
+| 10 (security and access) | **Partly superseded**: authentication is decided at the production step (below) |
+| 12 (validation spike), 15 (decisions), 17 (build order) | **Done or superseded** by the phases below |
 
-| Phase | Goal | Adds | Still missing | Move on when |
+### The phases
+
+| Phase | Goal | What it has | Status |
+|---|---|---|---|
+| **1. Research prototype** | Prove the pipeline matches Claude Project research quality | Next.js app, the staged pipeline, results, angle and contact selection, email, one workflow in browser `localStorage`, deployed on Vercel | **Done.** The pipeline works end to end. The UI was too verbose |
+| **2. Usable V1** | Something you open every week | Accounts table, company page (Research and Outreach), company context and per-run topic, saved companies, research runs and the one current email per company, in **PostgreSQL (Supabase)**; **one company at a time** | In progress. Step 2: UI on mock data. Step 3: PostgreSQL. Later: resume interrupted runs, authentication |
+| **3. Full V1** | Everything in the PRD and USER_FLOW | Background worker, Queued status, batch of up to 5, leaving and returning during research | Not started |
+
+Cost optimisation of the research pipeline happens after Phase 2 works. The live pipeline is frozen until then.
+
+### The implemented research pipeline (live)
+
+One request per stage; the browser drives the stages today.
+
+| Stage | Model | Web tools | Intelligence files (read from disk on every run) | Output |
 |---|---|---|---|---|
-| **1. Core research prototype** | Prove that the Claude API, Claude web search/fetch, our intelligence files and a staged process can match the research quality of the Claude Project | Next.js app; one company at a time; the staged research pipeline; structured results; results screen; angle and contact selection; email generate / edit / regenerate / copy; companies and research saved in browser `localStorage` behind a storage layer | A real database, batch, background jobs, login (a simple recent-companies list may appear) | The benchmark research (below) is judged good enough to build on |
-| **2. Personal persistent tool** | Make it something you open every week | A real database (PostgreSQL, model in `DATA_MODEL.md`; host to be chosen then: Supabase, Railway or similar), saved companies, context, research runs and the one current email per company, the Accounts table, hosting and a shared password | Background jobs, queue, batch research | You are genuinely using it regularly |
-| **3. Full V1** | Everything in the locked PRD and USER_FLOW | Background worker, queue, Queued / Researching statuses, batch of up to 5, re-research behaviour, remaining USER_FLOW screens and states | Anything the PRD lists as V2 | Product matches PRD and USER_FLOW |
+| Discover | Sonnet 5.5 | Anthropic web search + fetch | 01, 02 | Tagged lines: identification, evidence cards, people, open leads, coverage |
+| Follow-up (only if the gate says so) | Sonnet 5.5 | web search + fetch | 01, 02 | New cards, people, lead results |
+| Synthesis | Opus 5.5 | none | 01, 02, 03 | Relevance, ranked triggers (FACT / INFERENCE / POSSIBLE OPPORTUNITY), ranked people, 1 to 4 angles with one recommended, gaps |
+| Email (on demand) | Sonnet 5.5 | none | 04, 05 | Subject, body, facts relied on |
 
-Phase boundaries can move as we learn. Sections 2–17 below remain the plan for Phases 2 and 3 and are kept as researched. Where they conflict with this section, **this section wins for Phase 1 only**.
+- **Gate:** plain code between stages. It stops when the company is ambiguous, runs one follow-up round when there are open leads (or no people, or only a company profile), and otherwise goes to synthesis.
+- **Evidence cards and sources:** facts are stored as cards (E1, E2, ...) tied to source IDs (S1, S2, ...) assigned by our code. A card or person is kept only if it has an **evidence grade**: *api_cited* (the API attached a citation), *quote_verified* (the quoted words were found in the page text the API returned) or *tool_source* (the named URL exactly matches a page the tools returned or fetched, including PDFs; wording not checked). Claude-written URLs that the tools never returned are rejected.
+- **Dynamic filtering:** the web tools run in their default mode, in which Claude's own code filters results first. It is much cheaper and returns no citations, which is why `tool_source` exists. A "direct" mode costs more and still returned no citations in testing; it remains a configuration switch.
+- **Compact state between stages:** cards, people, leads, coverage and a short source table, never raw pages.
+- **Rules:** `01` to `05` are sent verbatim at run time. `06` is never sent. Prompts contain only a thin wrapper (unattended behaviour, output format).
+- **Retrieval layer:** one interface (`EvidenceRetriever`). Anthropic web tools are the only implementation; an external search provider could be added without touching the stages.
+- **Measured cost (one real run, Upper Hunter Shire Council):** discover $0.45, follow-up $0.58, synthesis $0.19, one email $0.02, total about **$1.23**, about 7 minutes. Estimates, not bills. The target after optimisation is much lower.
 
-### Phase 1 prototype architecture
+### Mock mode and the fixture
 
-| Part | Phase 1 | Target V1 (sections 2–17) |
-|---|---|---|
-| Frontend | Next.js + TypeScript, essentially one screen: form, progress, results, outreach | Full USER_FLOW screens |
-| Server logic | Next.js route handlers, one per pipeline stage | Same code, run by the worker |
-| AI + web | Anthropic API only: Claude, `web_search`, `web_fetch` | Same |
-| Intelligence rules | `docs/intelligence/` read from disk and sent to Claude (see below) | Same |
-| Database | **None** | PostgreSQL |
-| Persistence | Browser `localStorage`, reached only through a storage layer (below). Optional debug files on disk, never required | Database |
-| Background jobs | **None.** The browser drives the stages one after another | Worker + queue table |
-| Batch research | **None.** One company at a time | Up to 5, queued |
-| Login | **None while it runs locally.** A minimal access gate is added before any deployment | Shared password |
-| Hosting | Your computer (`localhost`) first; deployable later | Host not decided (Railway is the leading option; Supabase remains open) |
-| Other vendors | **None** (no search APIs, no people-data APIs) | Optional plan B services |
+`AI_MODE=mock|live` (`src/lib/mode.ts`). Mock answers from a saved Upper Hunter run (`src/fixtures/`) and never creates an Anthropic client. Production builds default to live; development and tests default to mock. **The fixture is development and test data only: it never enters prompts, intelligence files, examples or live research**, and tests enforce this.
 
-```
- YOUR COMPUTER (or, later, a deployment)
-┌─────────────────────────────────────────────────────────────┐
-│ Browser (page stays open) ──► Next.js server                │
-│   drives the stages:            • /api/research/identify    │
-│   identify → discover →         • /api/research/discover    │
-│   follow-up → synthesize        • /api/research/followup    │
-│        │                        • /api/research/synthesize  │
-│        │                        • /api/outreach             │
-│        ▼                                    │               │
-│   storage layer                             ▼               │
-│   (localStorage today)            reads docs/intelligence/  │
-│                                   keeps ANTHROPIC_API_KEY   │
-└─────────────────────────────────────┬───────────────────────┘
-                                      │ HTTPS (key stays on the server)
-                                      ▼
-                          Anthropic API: Claude + web search + web fetch
-```
+### Phase 2 architecture
 
-**Why the browser drives the stages (and not one long request).** A full run takes minutes. If one request did everything, a dropped connection or a restart would lose all of it. Instead, the browser asks for one stage at a time (the four discovery threads are four requests in parallel). Each stage's result is returned to the browser and saved through the storage layer before the next stage starts, so a refresh or a crash loses at most the stage that was running. The server stays stateless: the browser sends in what a stage needs and keeps what comes back. The stage functions live in a shared `lib/` folder and take plain inputs and return plain outputs, so in Phase 3 the background worker calls the very same functions. Nothing is thrown away.
-
-**Same data shapes as the target.** The records saved per run use the same objects as `DATA_MODEL.md` and the synthesis schema in section 7 (sources, findings, people, angles, gaps). Moving Phase 1 data into a database in Phase 2 is then an import, not a redesign.
-
-### Storage layer (Phase 1)
-
-The screens never touch `localStorage` directly. They call a small set of functions in one module, and only that module knows where data lives.
-
-| Area | Conceptual functions |
+| Part | Decision |
 |---|---|
-| Companies | `saveCompany`, `getCompany`, `listCompanies`, `deleteCompany` |
-| Research | `saveResearch`, `getResearch`, `getDefaultResearch`, `saveStageOutput`, `getStageOutput` |
-| Selection and contacts | `saveSelection`, `getSelection`, `saveManualContact`, `listManualContacts` |
-| Email | `saveEmail`, `getEmail` |
-
-Rules:
-1. **Every function is asynchronous from day one** (it returns a promise), even though `localStorage` is instant. Callers then work unchanged when the implementation becomes a database call over the network.
-2. **Only one implementation is active.** Phase 1 ships a `localStorage` implementation. Phase 2 adds a database-backed one (reached through server routes, because a browser cannot reach a database directly) and swaps it in. UI components do not change.
-3. **The layer stores the same objects as the target model** (company, run, finding, source, person, angle, gap, email), so the swap is a change of implementation, not of shape.
-4. **Size.** Browser storage is limited (a few megabytes per site). Phase 1 stores findings, source entries with short excerpts, notes and the email, not full page text. If the limit is hit, the app says so and offers to export the data as a file.
-5. **Debug files are allowed, not depended on.** While developing, the server may write raw API responses to a git-ignored `runs/` folder to inspect what Claude returned. The product never reads from it.
-6. **Stage endpoints do not store anything.** That keeps them reusable by the Phase 3 worker.
-
-### Rules for Phase 1
-
-- **Research depth is not reduced.** The pipeline stages in section 4 stay: identify, parallel discovery, follow-up, synthesis. Only the plumbing around them is simpler.
-- **The intelligence files are used as written.** `01`–`03` go into the research prompts and `04`–`05` into the email prompt, verbatim, plus a short wrapper explaining that the step runs unattended (do not ask questions; return the requested fields). `06` describes how an assistant learns from feedback; the PRD keeps learning manual, so it is not sent to the model.
-- **Models are a setting.** Each stage's model comes from one config file with two presets to compare: **A** Sonnet 5.5 for discovery and follow-up with Opus 5.5 for synthesis and email; **B** Opus 5.5 throughout.
-- **No cost cap.** The app shows tokens, searches and an estimated cost for every call and run. The only limits are **runaway guards**: a maximum number of searches and fetches per call, and a maximum number of continuations of a paused turn. They prevent a stuck loop, not overspending. Set a monthly spend limit in the Anthropic Console.
-- **People research** uses publicly accessible and indexed web information only.
-- **The Anthropic API key stays on the server.** It lives only in `.env.local` locally, or in the deployment's environment variables later. It is never sent to the browser, never stored in `localStorage`, never logged.
-- **Develop and test locally first, but do not assume it can never be deployed.** Phase 1 has no login, and anyone who could reach a deployed copy could spend your Anthropic money. Before any deployment, add a minimal access gate (a shared password or the host's built-in protection).
-
-### What Phase 1 temporarily lacks
-
-| Missing | Effect for now |
-|---|---|
-| **Database** | Data lives in one browser's `localStorage`. It survives a refresh and reopening the browser, but clearing browser data deletes it, and nothing is shared across browsers or devices. Storage is limited in size. No full Accounts table, no re-research behaviour or default/older-run logic beyond what the storage layer keeps, and no history |
-| **Background worker** | The page, and the local server, must stay running while a company is researched. No Queued state, no batch, no leaving and coming back. If the server restarts mid-stage, that stage is re-run |
-| **Login / hosting** | Runs locally with no login. Deploying needs an access gate first |
-
-### Settled in the first coding milestone
-
-These are the technical unknowns that decide details of the pipeline. None blocks starting.
-1. Web search is enabled for the Anthropic organisation, and the account's usage tier allows several parallel research calls.
-2. Whether web tools and structured output can be combined in one call. The design assumes **not** (section 4.6) and adds a separate structuring step; if they can be combined, a call can be saved.
-3. **Schema size.** Structured output has complexity limits (about 24 optional fields and 16 union types in total). A schema with many "nullable" fields can exceed them. Design: make every field required, use empty values instead of null, and if needed split synthesis into two smaller calls (findings first, then angles, people and verdict).
-4. How large PDF-heavy runs are in tokens, which matters for the council benchmark.
-5. How big one saved run is in `localStorage`, to confirm the browser limit is comfortable.
-
-### Benchmark (defined here, not yet run)
-
-The first two companies, compared with the existing Claude Project research:
-
-| Company | What it tests |
-|---|---|
-| **Indratel** | Integrator research, vendor and partner pages, technologies, relevant people, industry activity, direct and indirect opportunities |
-| **Upper Hunter Shire Council** | Obscure public-sector research, council documents and PDFs, budgets and capital works, telemetry and SCADA, historical vs current intelligence, cellular relevance |
-
-Compare for each: the strongest trigger found, other triggers, relevant people, technologies and vendors, projects and contracts, historical vs current separation, source quality (primary vs aggregator), unsupported claims, what the Claude Project found that the API missed and the reverse, wall-clock time and cost. To do this, the two existing Claude Project reports need to be saved in the repository (for example under `benchmarks/`) before the comparison.
-
-### How the rest of this document relates to the phases
-
-- **Sections 2–11, 13–16:** target architecture for Phases 2 and 3. Section 4 (the pipeline) and section 7 (structured output) apply to Phase 1 as well.
-- **Sections 5.3 and 5.5 (database and hosting):** Railway PostgreSQL is the leading option for Phase 2, not a decision. Supabase and other PostgreSQL hosts remain open and will be chosen when Phase 2 starts.
-- **Section 8.4 (caps):** not applied in Phase 1, see the rules above.
-- **Section 12 (validation spike):** replaced by the Phase 1 prototype and benchmark.
-- **Section 17 (build order):** replaced by the phases above.
+| Frontend | Next.js + TypeScript. Accounts table; company page with Research and Outreach tabs; panels for context, details and delete |
+| Data access | A **repository interface**. The UI never touches `localStorage` or the database directly. Implementations: in-memory mock (Step 2), PostgreSQL (Step 3) |
+| Database | **PostgreSQL on Supabase**, used as plain Postgres through a server-only `DATABASE_URL`. The browser never talks to the database |
+| State between stages | Held in the database once it exists. Stage routes take a run ID, load state, run and save. (Today the browser holds it and sends it back, validated, on each stage) |
+| Research driving | Still browser-driven in Phase 2, because one stage can take up to about 5 minutes and Vercel limits a request to 300 seconds. Closing the tab stops the run. Resuming an interrupted run comes after database persistence |
+| Background jobs, queue, batch | Phase 3 |
+| Authentication | **Deferred to the production step.** The prototype is protected by its host. Options to decide then: the database host's auth, or a simple password. API keys and `DATABASE_URL` are server-only secrets, never in the repository or the browser |
+| Cost cap | A configurable company-level cap exists in code and is off |
+| What is stored per run | The whole research result (cards, sources, people, leads, coverage, synthesis, gate log), stage logs with usage and estimated cost, warnings, the rules version (hash) and models used. Fetched page text is not stored |
 
 ---
 
@@ -224,6 +165,8 @@ External services needed: **Railway** (hosting) and **Anthropic** (AI + web). Th
 
 ## 3. System architecture
 
+> **Superseded** for Phases 1 and 2 by the top section (browser-driven stages, no worker). The worker design here is the Phase 3 target.
+
 ### 3.1 The components
 
 ```
@@ -313,6 +256,8 @@ A new run is created. The old default research stays untouched and visible. When
 ---
 
 ## 4. The research pipeline
+
+> **Superseded** by "The implemented research pipeline" at the top. Read this section for the original reasoning only: the parallel discovery threads, the separate structuring step and the 13 to 15 call count were not built.
 
 ### 4.1 Design principle
 
@@ -481,6 +426,8 @@ Each discovery thread is written as "given a job, return notes plus ledger entri
 
 ## 5. External services and options
 
+> **Decided:** Anthropic only for AI and web access; PostgreSQL on **Supabase**; Vercel hosting. Background jobs (5.4) are Phase 3.
+
 ### 5.1 A. LLM
 
 | Option | Role | Strengths | Weaknesses | Price (per million tokens) | Verdict |
@@ -571,6 +518,8 @@ Deployment shape: one Git repository; Railway builds two services from it (web a
 
 ## 7. Structured AI output
 
+> **Partly superseded:** structured (JSON schema) output is used for synthesis and email only. The research stages use tagged text, because structured output cannot be combined with the web tools' citations.
+
 Claude's research result becomes **application data**, not a block of text. The synthesis call returns one JSON document of these objects. A schema (Zod) defines and validates it.
 
 > Conceptual shape only, not final field names.
@@ -608,6 +557,8 @@ Claude's research result becomes **application data**, not a block of text. The 
 
 ## 8. Cost model
 
+> **Superseded** by the measured costs at the top (about $1.23 for one real run). The estimates below were made before anything was built.
+
 > **Every number in this section is an estimate. None has been measured.** The spike replaces them.
 
 ### 8.1 What drives cost
@@ -624,6 +575,8 @@ Claude's research result becomes **application data**, not a block of text. The 
 Why tokens dominate: during a search turn, every search result and every fetched page is added to what Claude reads, and each new step re-reads the growing conversation. Ten searches and a few fetches in one thread easily means hundreds of thousands of input tokens in total. PDFs are the extreme case.
 
 ### 8.2 Per-company estimate
+
+> Measured instead of estimated: see the top section.
 
 Assumptions: 35–60 searches; total billed input of 0.6–1.8 million tokens across threads; 40–80 thousand output tokens; synthesis with 60–120 thousand input and 15–30 thousand output; one email afterwards.
 
@@ -703,6 +656,8 @@ Each Failed or Partial run stores a **reason** and detail, shown as the short re
 
 ## 10. Security and access
 
+> **Authentication is deferred** to the production step; the shared-password design below is one option, not a decision. API keys, `DATABASE_URL` and server-only access remain firm rules.
+
 ### 10.1 Keeping strangers out
 
 The simplest reasonable approach for a private single-user tool:
@@ -742,6 +697,8 @@ Stronger option for later: Cloudflare Access in front of the app, with a one-tim
 ---
 
 ## 12. Validation spike: do this before building the app
+
+> **Done.** Replaced by the Phase 1 prototype and live runs.
 
 > **Phase note.** Superseded by the Phase 1 prototype and benchmark (see "Implementation phases" at the top). The measurements listed here are still the right things to measure.
 
@@ -800,6 +757,8 @@ None of these contradicts the locked scope; they are friction to be aware of.
 
 ## 15. Decisions that need your input
 
+> **Mostly resolved:** models per stage (Sonnet for research and email, Opus for synthesis), no run caps for now, public-source people research, database host (Supabase). Authentication and backups remain open.
+
 1. **Model tier per stage.** Default is Opus 5.5 everywhere. The spike measures Sonnet 5.5 for the search threads. You decide the quality-vs-cost balance after seeing the results.
 2. **Run caps.** Proposed starting values: about $6 estimated spend and 30 minutes per run. Are those right?
 3. **Approve the spike** (and a budget of roughly $40–$100 of Anthropic usage) before any app code is written. I strongly recommend it.
@@ -827,6 +786,8 @@ None of these contradicts the locked scope; they are friction to be aware of.
 ---
 
 ## 17. Suggested build order (for the next planning stage)
+
+> **Superseded** by the phases at the top.
 
 > **Phase note.** Superseded by the three implementation phases at the top of this document. Kept for reference when Phases 2 and 3 are planned.
 

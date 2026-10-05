@@ -18,6 +18,7 @@ import type {
   EntityInfo,
   EntityMatch,
   EvidenceCard,
+  EvidenceGrade,
   Lead,
   LeadPriority,
   LeadStatus,
@@ -29,6 +30,8 @@ import type {
   WorkflowInput,
 } from "./types";
 import { CARD_KINDS } from "./types.ts";
+
+const GRADES: readonly EvidenceGrade[] = ["api_cited", "quote_verified", "tool_source"];
 
 export interface StateLimits {
   maxCards: number;
@@ -283,16 +286,18 @@ export function serializeStateForModel(state: ResearchState, opts: { includeSour
     out.push("");
   }
 
-  out.push(`EVIDENCE CARDS (${state.cards.length}). Each is a sourced fact: id | kind | date | claim | source ids`);
+  out.push(
+    `EVIDENCE CARDS (${state.cards.length}). Each is a sourced fact: id | kind | date | claim | source ids | evidence grade (api_cited > quote_verified > tool_source)`,
+  );
   for (const c of state.cards) {
-    out.push(`${c.id} | ${c.kind} | ${c.date ?? "undated"} | ${oneLine(c.claim)} | ${c.sourceKeys.join(",")}`);
+    out.push(`${c.id} | ${c.kind} | ${c.date ?? "undated"} | ${oneLine(c.claim)} | ${c.sourceKeys.join(",")} | ${c.grade}`);
   }
   out.push("");
 
-  out.push(`PEOPLE FOUND (${state.people.length}). id | name | role | organisation | why relevant | source ids`);
+  out.push(`PEOPLE FOUND (${state.people.length}). id | name | role | organisation | why relevant | source ids | evidence grade`);
   for (const p of state.people) {
     out.push(
-      `${p.id} | ${oneLine(p.name)} | ${oneLine(p.role)} | ${oneLine(p.organisation)} | ${oneLine(p.whyRelevant)} | ${p.sourceKeys.join(",")}`,
+      `${p.id} | ${oneLine(p.name)} | ${oneLine(p.role)} | ${oneLine(p.organisation)} | ${oneLine(p.whyRelevant)} | ${p.sourceKeys.join(",")} | ${p.grade}`,
     );
   }
   out.push("");
@@ -407,7 +412,7 @@ export function sanitizeState(v: unknown, limits: StateLimits): ResearchState {
       claim: str(c.claim, limits.maxClaimChars),
       sourceKeys: strList(c.sourceKeys, 8, 12).filter((k) => sourceKeys.has(k)),
       evidence: evidenceList(c.evidence, limits).filter((e) => sourceKeys.has(e.sourceKey)),
-      grade: c.grade === "quote_verified" ? ("quote_verified" as const) : ("api_cited" as const),
+      grade: oneOf<EvidenceGrade>(c.grade, GRADES, "api_cited"),
       stage: c.stage === "followup" ? ("followup" as const) : ("discover" as const),
       round: Math.max(0, Math.floor(num(c.round))),
     }))
@@ -423,7 +428,7 @@ export function sanitizeState(v: unknown, limits: StateLimits): ResearchState {
       whyRelevant: str(p.whyRelevant, limits.maxClaimChars),
       sourceKeys: strList(p.sourceKeys, 8, 12).filter((k) => sourceKeys.has(k)),
       evidence: evidenceList(p.evidence, limits).filter((e) => sourceKeys.has(e.sourceKey)),
-      grade: p.grade === "quote_verified" ? ("quote_verified" as const) : ("api_cited" as const),
+      grade: oneOf<EvidenceGrade>(p.grade, GRADES, "api_cited"),
       stage: p.stage === "followup" ? ("followup" as const) : ("discover" as const),
     }))
     .filter((p) => /^P\d+$/.test(p.id) && p.name && p.sourceKeys.length > 0);

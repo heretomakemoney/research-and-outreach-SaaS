@@ -22,26 +22,23 @@ const SONNET: ModelId = "claude-sonnet-5-5";
 const OPUS: ModelId = "claude-opus-5-5";
 
 /**
- * HOW Claude reads web results. This decides whether the API can vouch for the facts.
+ * HOW Claude reads web results.
  *
- *  "direct"    - Claude reads each search result / fetched page itself. The API then attaches
- *                citations (with the exact excerpt) to the text Claude writes. This is what
- *                traceable evidence needs.
- *  "dynamic"   - "Dynamic filtering": Claude's own code filters the results first and Claude writes
- *                its answer from that code's output (which comes back encrypted). Cheaper on tokens,
- *                but the answer then carries NO citations, so no fact can be tied to a source.
+ *  "dynamic" - the tool versions' default ("dynamic filtering"): Claude's own code filters the results
+ *              before Claude reads them. Cheap on tokens, but the API attaches NO citations to the answer
+ *              (the code output comes back encrypted). Source traceability then comes from the evidence
+ *              grades in parse.ts: Claude names a URL, and we only accept it if it is a source the tools
+ *              really returned or fetched (the "tool_source" grade), or if we can verify its quote.
+ *  "direct"  - Claude reads every result and page itself. Live test (Upper Hunter): it cost $0.56 for
+ *              3 searches + 1 fetch (about 174k cache-write tokens) against $0.22 for 6 searches in
+ *              "dynamic", and STILL returned zero API citations. Not worth it; kept only as a switch.
  *
- * The first live run (Upper Hunter) used the default of these tool versions, "dynamic":
- * 0 citations, so every card was rejected. Keep "direct" unless citations are not needed.
- *
- * Cost note: "direct" puts the full search results and fetched pages into the model's context.
- * `fetchMaxContentTokens` bounds web PAGES but the API does NOT apply it to PDFs, so a long
- * council-agenda PDF can be large. Watch the cost table on PDF-heavy councils.
+ * `fetchMaxContentTokens` (null = not set, as in the cheaper runs) only bounds web PAGES, never PDFs.
  */
 export const WEB_TOOLS = {
-  searchCaller: "direct" as "direct" | "dynamic",
-  fetchCaller: "direct" as "direct" | "dynamic",
-  fetchMaxContentTokens: 30000,
+  searchCaller: "dynamic" as "direct" | "dynamic",
+  fetchCaller: "dynamic" as "direct" | "dynamic",
+  fetchMaxContentTokens: null as number | null,
 };
 
 interface WebStageConfig {

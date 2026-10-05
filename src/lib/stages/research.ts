@@ -102,16 +102,17 @@ export async function runResearchStage(
     ...merged.warnings,
   ];
   if (!retrieval.rawAnswerText.trim()) warnings.push("Claude returned no answer text.");
-  if (retrieval.stats.resultsViaCodeExecution > 0 && retrieval.stats.citationsTotal === 0) {
+  if (retrieval.stats.citationsTotal === 0) {
     warnings.push(
-      `${retrieval.stats.resultsViaCodeExecution} search/fetch result(s) were read through code execution (dynamic filtering). That mode returns no citations, so facts cannot be tied to sources. Check WEB_TOOLS in config.ts.`,
+      "The API attached no citations to this answer (normal with dynamic filtering). Evidence is graded by how it could be tied to a source: see the badges.",
     );
-  } else if (parsed.rejected.length > 0 && retrieval.stats.citationsTotal === 0) {
-    warnings.push("The answer contained no API citations at all, so cards could only be accepted through verified quotes.");
   }
-  const citedCards = parsed.cards.filter((c) => c.grade === "api_cited").length;
-  const quoteCards = parsed.cards.length - citedCards;
-  if (quoteCards > 0) warnings.push(`${quoteCards} card(s) were accepted through a verified quote (no API citation); ${citedCards} through API citations.`);
+  const grades = { api_cited: 0, quote_verified: 0, tool_source: 0 };
+  for (const c of [...parsed.cards, ...parsed.people]) grades[c.grade]++;
+  warnings.push(
+    `Evidence accepted: ${grades.api_cited} API-cited, ${grades.quote_verified} quote-verified, ${grades.tool_source} tool-source (cards + people).`,
+  );
+  warnings.push(...parsed.notes);
   if (parsed.cards.length === 0 && parsed.people.length === 0) warnings.push("The answer contained no usable evidence cards or people.");
   if (parsed.ignoredLines > 0) warnings.push(`${parsed.ignoredLines} line(s) of the answer were not in the tagged format and were ignored.`);
 

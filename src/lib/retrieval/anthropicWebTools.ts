@@ -35,7 +35,7 @@ export function buildWebTools(
       name: "web_fetch",
       max_uses: request.budget.maxFetches,
       citations: { enabled: true },
-      max_content_tokens: settings.fetchMaxContentTokens,
+      ...(settings.fetchMaxContentTokens !== null ? { max_content_tokens: settings.fetchMaxContentTokens } : {}),
       ...(settings.fetchCaller === "direct" ? { allowed_callers: ["direct" as const] } : {}),
     },
   ];

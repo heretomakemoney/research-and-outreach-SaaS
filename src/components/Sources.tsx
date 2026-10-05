@@ -7,11 +7,14 @@ import type { EvidenceCard, EvidenceGrade, LedgerSource } from "@/lib/types";
 const GRADE_LABEL: Record<EvidenceGrade, string> = {
   api_cited: "API citation",
   quote_verified: "verified quote",
+  tool_source: "tool source (wording not checked)",
 };
 const GRADE_HELP: Record<EvidenceGrade, string> = {
   api_cited: "The API attached a citation (with the excerpt it returned) to this claim.",
   quote_verified:
     "No API citation. The source is one the web tools returned, and the quote was found word for word in the page text the API returned.",
+  tool_source:
+    "The source is a page the web tools really returned or fetched (for example an official PDF), but its wording was not independently checked. Weaker evidence.",
 };
 
 export function GradeBadge({ grade }: { grade: EvidenceGrade }) {
@@ -100,7 +103,7 @@ export function CardView({ card }: { card: EvidenceCard }) {
       </div>
       {card.evidence.length > 0 && (
         <details>
-          <summary>{card.grade === "quote_verified" ? "Verified quote" : "Excerpt(s) the API returned for this claim"}</summary>
+          <summary>{card.grade === "quote_verified" ? "Verified quote" : card.grade === "tool_source" ? "Claude\u2019s quote (not independently checked)" : "Excerpt(s) the API returned for this claim"}</summary>
           <ul className="plain">
             {card.evidence.map((e, i) => (
               <li key={i}>

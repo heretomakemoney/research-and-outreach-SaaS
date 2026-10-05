@@ -8,8 +8,10 @@
 //
 // Pure functions, unit-tested in synthesis.test.ts.
 
+import { GRADE_RANK } from "./types.ts";
 import type {
   Angle,
+  EvidenceGrade,
   AngleStrength,
   EvidenceCard,
   LeadPriority,
@@ -32,6 +34,16 @@ function oneOf<T extends string>(v: unknown, allowed: readonly T[], fallback: T)
 }
 function ids(v: unknown): string[] {
   return Array.isArray(v) ? v.filter((x): x is string => typeof x === "string").map((x) => x.trim()) : [];
+}
+
+/** The weakest evidence grade among the given cards (what a claim resting on all of them can honestly claim). */
+export function weakestGrade(cardIds: readonly string[], cards: readonly EvidenceCard[]): EvidenceGrade | null {
+  let weakest: EvidenceGrade | null = null;
+  for (const id of cardIds) {
+    const card = cards.find((c) => c.id === id);
+    if (card && (weakest === null || GRADE_RANK[card.grade] < GRADE_RANK[weakest])) weakest = card.grade;
+  }
+  return weakest;
 }
 
 export interface ValidatedSynthesis {
@@ -74,6 +86,7 @@ export function validateSynthesis(raw: unknown, state: ResearchState): Validated
       scale: str(t.scale, 400),
       fact: str(t.fact, 1500),
       factCardIds,
+      evidenceGrade: weakestGrade(factCardIds, state.cards) ?? "tool_source",
       inference: str(t.inference, 1500),
       possibleOpportunity: str(t.possibleOpportunity, 1500),
       whyNow: str(t.whyNow, 800),
@@ -129,6 +142,7 @@ export function validateSynthesis(raw: unknown, state: ResearchState): Validated
       strength,
       triggerIds: angleTriggers,
       cardIds: angleCards,
+      evidenceGrade: weakestGrade(angleCards, state.cards),
       conversationQuestion: str(a.conversationQuestion, 800),
       whyItWorks: str(a.whyItWorks, 800),
       recommended: a.recommended === true,

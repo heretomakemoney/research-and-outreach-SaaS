@@ -141,8 +141,13 @@ export function buildLedger(
   const answerParts: string[] = [];
   const segments: AnswerSegment[] = [];
   let rawLength = 0;
+  // Text blocks that are separated by tool calls / thinking are different "turns" of Claude's writing
+  // ("Now let me read the PDF." ... then the final answer). They must not be glued onto one line.
+  // Text blocks that follow each other directly are one passage split at a citation: those stay joined.
+  let sawNonTextSinceText = false;
 
   for (const block of blocks) {
+    if (block.type !== "text") sawNonTextSinceText = true;
     switch (block.type) {
       case "server_tool_use": {
         stats.serverToolUseBlocks++;
@@ -236,6 +241,11 @@ export function buildLedger(
         // Only OUR code may write [S#] markers. If Claude typed one itself, neutralise it
         // so it can never pass for a real citation.
         const safeText = block.text.replace(/\[(S\d+)\]/g, "($1)");
+        if (sawNonTextSinceText && rawLength > 0 && !answerParts[answerParts.length - 1].endsWith("\n")) {
+          answerParts.push("\n");
+          rawLength += 1;
+        }
+        sawNonTextSinceText = false;
         const piece = safeText + keys.map((k) => ` [${k}]`).join("");
         segments.push({ start: rawLength, end: rawLength + piece.length, citations: segmentCitations });
         rawLength += piece.length;

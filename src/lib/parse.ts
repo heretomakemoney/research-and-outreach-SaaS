@@ -105,6 +105,8 @@ export interface ParsedResearch {
   coverage: ParsedCoverage[];
   relevance: { level: RelevanceLevel; note: string } | null;
   rejected: { line: string; reason: string }[];
+  /** Things worth a warning that did not stop a line being accepted (for example a quote that was not found). */
+  notes: string[];
   /** Non-empty lines that were not in the tagged format (kept out of the state). */
   ignoredLines: number;
 }
@@ -238,6 +240,31 @@ function evidenceForRange(segments: AnswerSegment[], start: number, end: number)
   return out;
 }
 
+const TAG_START =
+  /(?<=\S)(?=(?:ENTITY_MATCH|ENTITY_NAME|OFFICIAL_WEBSITE|TRADING_LEGAL|CLIENT_TYPE|CONTEXT_CHECK)\s*[:|=]|(?:CARD|PERSON|LEAD_RESULT|LEAD|COVERAGE|RELEVANCE)\s*\|)/g;
+
+/**
+ * Split the answer into lines with their exact character offsets. A new line also starts wherever a
+ * recognised tag appears in the middle of a line (text from two writing turns that ended up on one line),
+ * so "...read the PDF.ENTITY_MATCH: Confirmed" still yields an ENTITY_MATCH line.
+ */
+function splitLines(raw: string): { text: string; start: number; end: number }[] {
+  const cuts: { at: number; skip: number }[] = []; // cut at `at`; the next line starts at `at + skip`
+  for (let i = 0; i < raw.length; i++) if (raw[i] === "\n") cuts.push({ at: i, skip: 1 });
+  for (const m of raw.matchAll(TAG_START)) {
+    if (m.index !== undefined && m.index > 0 && raw[m.index - 1] !== "\n") cuts.push({ at: m.index, skip: 0 });
+  }
+  cuts.sort((a, b) => a.at - b.at);
+  const lines: { text: string; start: number; end: number }[] = [];
+  let start = 0;
+  for (const cut of cuts) {
+    lines.push({ text: raw.slice(start, cut.at), start, end: cut.at });
+    start = cut.at + cut.skip;
+  }
+  lines.push({ text: raw.slice(start), start, end: raw.length });
+  return lines;
+}
+
 function keysForLine(lineText: string, evidence: Evidence[]): string[] {
   const keys = markerKeys(lineText);
   for (const e of evidence) if (!keys.includes(e.sourceKey)) keys.push(e.sourceKey);
@@ -308,12 +335,16 @@ function splitSourceTail(rest: string): { main: string; url: string; quote: stri
 }
 
 type Tie =
-  | { ok: true; sourceKeys: string[]; evidence: Evidence[]; grade: EvidenceGrade }
+  | { ok: true; sourceKeys: string[]; evidence: Evidence[]; grade: EvidenceGrade; note?: string }
   | { ok: false; reason: string };
 
 /**
- * Decide how (if at all) a CARD / PERSON line is tied to a real source.
- * 1) API citations on the line's text. 2) A named ledger URL plus a quote found in the page text the API returned.
+ * Decide how (if at all) a CARD / PERSON line is tied to a real source, strongest first.
+ *  1) api_cited      - the API attached a citation to the line's text.
+ *  2) quote_verified - the line names a URL from the ledger and its quote is in the page text the API returned.
+ *  3) tool_source    - the line names a URL that EXACTLY matches a source the web tools returned or fetched
+ *                      (PDFs included). We cannot check the wording, so this is the weakest grade.
+ * A URL the tools never returned is never accepted, whatever Claude wrote.
  */
 function tieToSource(
   lineText: string,
@@ -325,19 +356,33 @@ function tieToSource(
   const apiKeys = keysForLine(lineText, apiEvidence);
   if (apiKeys.length > 0) return { ok: true, sourceKeys: apiKeys, evidence: pickEvidence(apiEvidence), grade: "api_cited" };
 
-  if (!ctx || !url || !quote) {
-    return { ok: false, reason: "no source: the API attached no citation and the line named no checkable source and quote" };
+  if (!ctx || !url) {
+    return { ok: false, reason: "no source: the API attached no citation and the line named no source URL" };
   }
   const key = ctx.resolveSource(url);
   if (!key) return { ok: false, reason: `no source: the named URL was not returned by any search or fetch (${url.slice(0, 80)})` };
+
   const text = ctx.pageText(key);
-  if (!text) {
-    return { ok: false, reason: `no source: ${key} was not read as page text (search snippet or PDF), so the quote cannot be checked and the API attached no citation` };
+  if (text && quote) {
+    const wanted = normaliseForMatch(quote);
+    if (wanted.length >= MIN_QUOTE_CHARS && normaliseForMatch(text).includes(wanted)) {
+      return { ok: true, sourceKeys: [key], evidence: [{ sourceKey: key, excerpt: quote.slice(0, 300) }], grade: "quote_verified" };
+    }
+    return {
+      ok: true,
+      sourceKeys: [key],
+      evidence: [{ sourceKey: key, excerpt: quote.slice(0, 300) }],
+      grade: "tool_source",
+      note: `the quote was not found in the text of ${key}`,
+    };
   }
-  const wanted = normaliseForMatch(quote);
-  if (wanted.length < MIN_QUOTE_CHARS) return { ok: false, reason: `no source: the quote for ${key} is too short to check` };
-  if (!normaliseForMatch(text).includes(wanted)) return { ok: false, reason: `no source: the quote was not found in the text of ${key}` };
-  return { ok: true, sourceKeys: [key], evidence: [{ sourceKey: key, excerpt: quote.slice(0, 300) }], grade: "quote_verified" };
+  // A real, tool-returned source whose text we cannot read (PDF, search snippet): accepted as the weakest grade.
+  return {
+    ok: true,
+    sourceKeys: [key],
+    evidence: quote ? [{ sourceKey: key, excerpt: quote.slice(0, 300) }] : [],
+    grade: "tool_source",
+  };
 }
 
 /**
@@ -359,6 +404,7 @@ export function parseResearchOutput(
     coverage: [],
     relevance: null,
     rejected: [],
+    notes: [],
     ignoredLines: 0,
   };
   const entity: ParsedEntity = {
@@ -375,11 +421,7 @@ export function parseResearchOutput(
   };
   let sawEntityMatch = false;
 
-  let offset = 0;
-  for (const rawLine of raw.split("\n")) {
-    const lineStart = offset;
-    const lineEnd = offset + rawLine.length;
-    offset = lineEnd + 1;
+  for (const { text: rawLine, start: lineStart, end: lineEnd } of splitLines(raw)) {
     if (!rawLine.trim()) continue;
 
     const line = normaliseLine(rawLine);
@@ -423,6 +465,7 @@ export function parseResearchOutput(
         } else if (!tie.ok) {
           result.rejected.push({ line: line.slice(0, 200), reason: `card has ${tie.reason}` });
         } else {
+          if (tie.note) result.notes.push(`A card was kept as a tool source: ${tie.note}.`);
           result.cards.push({
             kind: normaliseKind(kind),
             date: normaliseDate(date),
@@ -440,6 +483,7 @@ export function parseResearchOutput(
         } else if (!tie.ok) {
           result.rejected.push({ line: line.slice(0, 200), reason: `person has ${tie.reason}` });
         } else {
+          if (tie.note) result.notes.push(`A person was kept as a tool source: ${tie.note}.`);
           result.people.push({ name, role, organisation, whyRelevant, sourceKeys: tie.sourceKeys, evidence: tie.evidence, grade: tie.grade });
         }
       }

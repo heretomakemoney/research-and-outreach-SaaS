@@ -167,13 +167,18 @@ export const CARD_KINDS: readonly CardKind[] = [
 ];
 
 /**
- * How a card or person is tied to its source(s):
+ * How a card or person is tied to its source(s), strongest first:
  *  - api_cited:      the API attached a citation (with an excerpt it returned) to the text.
  *  - quote_verified: no API citation, but the line named a source that IS in the ledger and
  *                    its quote was found word for word in the page text the API returned.
- * Anything else is rejected.
+ *  - tool_source:    the line named a URL that exactly matches a source the web tools returned or
+ *                    fetched (including PDFs, whose text we cannot read). Traceable to a real page,
+ *                    but the wording itself is not independently checked. Visibly weaker.
+ * A line that names no ledger source and has no citation is rejected.
  */
-export type EvidenceGrade = "api_cited" | "quote_verified";
+export type EvidenceGrade = "api_cited" | "quote_verified" | "tool_source";
+
+export const GRADE_RANK: Record<EvidenceGrade, number> = { api_cited: 3, quote_verified: 2, tool_source: 1 };
 
 /**
  * One sourced fact. Cards are FACTS only: a claim backed by at least one
@@ -270,6 +275,7 @@ export interface Trigger {
   scale: string; // numbers of sites / vehicles / value etc. or ""
   fact: string; // FACT: what the evidence says
   factCardIds: string[]; // evidence cards supporting the FACT
+  evidenceGrade: EvidenceGrade; // the WEAKEST grade among those cards (worked out by code, not by the model)
   inference: string; // INFERENCE: reasoning, clearly separate
   possibleOpportunity: string; // POSSIBLE OPPORTUNITY (a question to explore, not a pitch)
   whyNow: string;
@@ -287,6 +293,7 @@ export interface Angle {
   strength: AngleStrength;
   triggerIds: string[];
   cardIds: string[]; // the evidence this angle rests on
+  evidenceGrade: EvidenceGrade | null; // weakest grade among those cards; null when the angle cites none
   conversationQuestion: string; // the simple question the email will ask
   whyItWorks: string;
   recommended: boolean;

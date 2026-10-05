@@ -87,7 +87,7 @@ export default function ResearchView({
                 <span className="badge">{RANK_LABEL[t.rank]}</span>{" "}
                 <span className="badge light">{t.kind === "sales_trigger" ? "sales trigger" : "conversation hook"}</span>{" "}
                 <span className="badge light">{t.priority} priority</span>{" "}
-                <span className="badge light">{RECENCY_LABEL[t.recency]}</span>
+                <span className="badge light">{RECENCY_LABEL[t.recency]}</span> <GradeBadge grade={t.evidenceGrade} />
               </div>
               <h3>{t.title}</h3>
               <p>
@@ -177,6 +177,7 @@ export default function ResearchView({
                 <strong>{a.title}</strong>
                 {a.recommended && <span className="badge">RECOMMENDED</span>}
                 <span className="badge light">{STRENGTH_LABEL[a.strength]}</span>
+                {a.evidenceGrade && <GradeBadge grade={a.evidenceGrade} />}
               </label>
               <div>
                 <strong>Question to explore:</strong> {a.conversationQuestion}
@@ -217,9 +218,9 @@ export default function ResearchView({
         </>
       )}
 
-      <h2>All evidence ({state.cards.length} cards)</h2>
-      <details>
-        <summary>Show every evidence card</summary>
+      <h2>What was found ({state.cards.length} findings)</h2>
+      <details open>
+        <summary>Every finding, with its source</summary>
         {state.cards.map((c) => (
           <CardView key={c.id} card={c} />
         ))}

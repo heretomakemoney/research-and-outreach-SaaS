@@ -22,7 +22,7 @@ const source = (n: number): LedgerSource => ({
 const input = { companyName: "Indratel", website: "", context: "private note", topic: "" };
 
 function parsed(over: Partial<ParsedResearch> = {}): ParsedResearch {
-  return { entity: null, cards: [], people: [], leads: [], leadResults: [], coverage: [], relevance: null, rejected: [], ignoredLines: 0, ...over };
+  return { entity: null, cards: [], people: [], leads: [], leadResults: [], coverage: [], relevance: null, rejected: [], notes: [], ignoredLines: 0, ...over };
 }
 
 const card = (claim: string, keys: string[] = ["S1"]) => ({
